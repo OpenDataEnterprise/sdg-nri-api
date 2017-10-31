@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     tags: {
       type: DataTypes.ARRAY(DataTypes.STRING),
     },
-    created: {
+    first_created: {
       type: DataTypes.DATE,
     },
     last_modified: {
