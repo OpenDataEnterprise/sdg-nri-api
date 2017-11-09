@@ -41,4 +41,21 @@ modelsDir: __dirname + '/models',
 sequelize: require('./models').sequelize
 }));
 
+app.get('/resources/', async (req, res, next) => {
+    const { Client } = require('pg');
+    const client = new Client({
+        connectionString: process.env.DATABASE_URL,
+        ssl: true,
+    });
+
+    try {
+        await client.connect();
+        const { rows } = await client.query('SELECT * FROM sdg.resource');
+        await client.end();
+        res.send(rows);
+    } catch (err) {
+        console.log(err);
+    }
+});
+
 module.exports = app;
