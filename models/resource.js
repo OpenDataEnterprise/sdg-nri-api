@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     url: {
       type: DataTypes.STRING,
     },
-    image: {
+    image_url: {
       type: DataTypes.STRING,
     },
     tags: {
@@ -25,6 +25,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     last_modified: {
       type: DataTypes.DATE,
+    },
+    organization: {
+      type: DataTypes.STRING,
+    },
+    date_published: {
+      type: DataTypes.DATE,
+    },
+    geographical_unit_id: {
+      type: DataTypes.INTEGER,
     },
   }, {
     tableName: 'resource',
