@@ -20,6 +20,9 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Model.associate = (models) => {
+    Model.belongsToMany(models.language, {
+      through: 'resource_languages'
+    });
   };
 
   return Model;
