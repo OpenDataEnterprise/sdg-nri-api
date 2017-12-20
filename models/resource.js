@@ -2,38 +2,44 @@
 
 module.exports = (sequelize, DataTypes) => {
   var Model = sequelize.define('resource', {
-    name: {
+    uuid: {
+      type: DataTypes.UUID,
+    },
+    country_id: {
       type: DataTypes.STRING,
     },
-    type: {
+    title: {
       type: DataTypes.STRING,
     },
-    description: {
+    organization: {
       type: DataTypes.STRING,
     },
     url: {
       type: DataTypes.STRING,
     },
+    date_published: {
+      type: DataTypes.DATE,
+    },
     image_url: {
+      type: DataTypes.STRING,
+    },
+    description: {
+      type: DataTypes.STRING,
+    },
+    type: {
       type: DataTypes.STRING,
     },
     tags: {
       type: DataTypes.ARRAY(DataTypes.STRING),
     },
-    first_created: {
+    publish: {
+      type: DataTypes.BOOLEAN,
+    },
+    created: {
       type: DataTypes.DATE,
     },
     last_modified: {
       type: DataTypes.DATE,
-    },
-    organization: {
-      type: DataTypes.STRING,
-    },
-    date_published: {
-      type: DataTypes.DATE,
-    },
-    geographical_unit_id: {
-      type: DataTypes.INTEGER,
     },
   }, {
     tableName: 'resource',
