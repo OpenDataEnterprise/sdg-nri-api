@@ -49,6 +49,9 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Model.associate = (models) => {
+      Model.hasOne(model.country, {
+        foreignKey: 'iso_alpha3',
+      });
   };
 
   return Model;
