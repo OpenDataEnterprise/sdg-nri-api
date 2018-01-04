@@ -2,11 +2,10 @@
 
 module.exports = (sequelize, DataTypes) => {
   var Model = sequelize.define('resource', {
-    uuid: {
+    id: {
       type: DataTypes.UUID,
-    },
-    country_id: {
-      type: DataTypes.STRING,
+      default: DataTypes.UUIDV1,
+      primaryKey: true
     },
     title: {
       type: DataTypes.STRING,
@@ -34,26 +33,19 @@ module.exports = (sequelize, DataTypes) => {
     },
     publish: {
       type: DataTypes.BOOLEAN,
-    },
-    created: {
-      type: DataTypes.DATE,
-    },
-    last_modified: {
-      type: DataTypes.DATE,
-    },
+    }
   }, {
     tableName: 'resource',
     underscored: true,
-    timestamps: false,
+    timestamps: true,
     schema: process.env.DATABASE_SCHEMA,
   });
 
   Model.associate = (models) => {
-      Model.hasOne(model.country, {
-        foreignKey: 'iso_alpha3',
-      });
+    /*Model.hasOne(models.country, {
+      foreignKey: 'iso_alpha3'
+    });*/
   };
 
   return Model;
 };
-

@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       primaryKey: true 
     },
-    region_m49: {
+    region_id: {
       type: DataTypes.STRING,
     },
     name: {
@@ -20,6 +20,9 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Model.associate = (models) => {
+    Model.hasMany(models.resource, {
+      foreignKey: 'id'
+    });
   };
 
   return Model;

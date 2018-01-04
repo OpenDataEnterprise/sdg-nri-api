@@ -1,15 +1,22 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-  var Model = sequelize.define('resource_topic', {
-    topic: {
+  var Model = sequelize.define('topic', {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true
+    },
+    tag: {
+      type: DataTypes.STRING,
+    },
+    path: {
       type: DataTypes.STRING,
     },
     label: {
       type: DataTypes.STRING,
     },
   }, {
-    tableName: 'resource_topic',
+    tableName: 'topic',
     
     timestamps: false,
     schema: process.env.DATABASE_SCHEMA,
