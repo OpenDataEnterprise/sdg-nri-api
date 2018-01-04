@@ -21,7 +21,10 @@ module.exports = (sequelize, DataTypes) => {
 
   Model.associate = (models) => {
     Model.belongsToMany(models.language, {
-      through: 'resource_languages'
+      as: 'Languages',
+      through: 'resource_languages',
+      foreignKey: 'resource_id',
+      sourceKey: 'ietf_tag'
     });
   };
 

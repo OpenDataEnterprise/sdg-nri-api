@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       primaryKey: true 
     },
-    hierarchy: {
+    path: {
       type: DataTypes.STRING,
     },
     name: {
