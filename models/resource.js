@@ -2,10 +2,26 @@
 
 module.exports = (sequelize, DataTypes) => {
   var Model = sequelize.define('resource', {
-    id: {
+    uuid: {
       type: DataTypes.UUID,
-      default: DataTypes.UUIDV1,
-      primaryKey: true
+      defaultValue: sequelize.literal('uuid_generate_v1mc()'),
+      primaryKey: true,
+    },
+    country_id: {
+      type: DataTypes.CHAR(3),
+      references: {
+        model: sequelize.models.country,
+        key: 'iso_alpha3',
+        deferrable: sequelize.Deferrable.INITIALLY_IMMEDIATE,
+      }
+    },
+    resource_type_id: {
+      type: DataTypes.UUID,
+      references: {
+        model: sequelize.models.resource_type,
+        key: 'id',
+        deferrable: sequelize.Deferrable.INITIALLY_IMMEDIATE,
+      }
     },
     title: {
       type: DataTypes.STRING,
@@ -25,14 +41,12 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.STRING,
     },
-    type: {
-      type: DataTypes.STRING,
-    },
     tags: {
       type: DataTypes.ARRAY(DataTypes.STRING),
     },
     publish: {
       type: DataTypes.BOOLEAN,
+      defaultValue: false,
     }
   }, {
     tableName: 'resource',
@@ -42,10 +56,33 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Model.associate = (models) => {
-    /*Model.hasOne(models.country, {
-      foreignKey: 'iso_alpha3'
-    });*/
+    Model.belongsTo(models.country, {
+      foreignKey: 'country_id',
+    });
+    Model.belongsTo(models.resource_type, {
+      foreignKey: 'resource_type_id',
+    });
+    Model.belongsToMany(models.language, {
+      through: {
+        model: 'resource_languages',
+        unique: false,
+      },
+      foreignKey: 'resource_id',
+      otherKey: 'language_id',
+      constraints: true,
+      cascade: true,
+    });
+    Model.belongsToMany(models.topic, {
+      through: {
+        model: 'topic_resources',
+        unique: false,
+      },
+      foreignKey: 'resource_id',
+      otherKey: 'topic_id',
+      constraints: true,
+    });
   };
 
   return Model;
 };
+

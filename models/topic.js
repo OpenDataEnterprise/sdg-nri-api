@@ -4,7 +4,8 @@ module.exports = (sequelize, DataTypes) => {
   var Model = sequelize.define('topic', {
     id: {
       type: DataTypes.INTEGER,
-      primaryKey: true
+      primaryKey: true,
+      autoIncrement: true,
     },
     tag: {
       type: DataTypes.STRING,
@@ -17,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     tableName: 'topic',
-    
+    underscored: true,
     timestamps: false,
     schema: process.env.DATABASE_SCHEMA,
   });
