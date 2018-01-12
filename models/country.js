@@ -3,10 +3,19 @@
 module.exports = (sequelize, DataTypes) => {
   var Model = sequelize.define('country', {
     iso_alpha3: {
-      type: DataTypes.STRING,
-      primaryKey: true 
+      type: DataTypes.CHAR(3),
+      field: 'iso_alpha3',
+      primaryKey: true,
     },
     region_id: {
+      type: DataTypes.STRING,
+      references: {
+        model: sequelize.models.region,
+        key: 'm49',
+        deferrable: sequelize.Deferrable.INITIALLY_IMMEDIATE,
+      }
+    },
+    income_group: {
       type: DataTypes.STRING,
     },
     name: {
@@ -20,8 +29,8 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Model.associate = (models) => {
-    Model.hasMany(models.resource, {
-      foreignKey: 'id'
+    Model.belongsTo(models.region, {
+      foreignKey: 'region_id',
     });
   };
 
