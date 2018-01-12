@@ -65,7 +65,7 @@ module.exports = (sequelize, DataTypes) => {
     Model.belongsToMany(models.language, {
       through: {
         model: 'resource_languages',
-        unique: false,
+        unique: true,
       },
       foreignKey: 'resource_id',
       otherKey: 'language_id',
@@ -75,11 +75,12 @@ module.exports = (sequelize, DataTypes) => {
     Model.belongsToMany(models.topic, {
       through: {
         model: 'topic_resources',
-        unique: false,
+        unique: true,
       },
       foreignKey: 'resource_id',
       otherKey: 'topic_id',
       constraints: true,
+      cascade: true,
     });
   };
 

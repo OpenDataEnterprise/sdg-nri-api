@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     resource_id: {
       type: DataTypes.INTEGER,
       references: {
-        model: sequelize.models.reference,
+        model: sequelize.models.resource,
         key: 'uuid',
         deferrable: sequelize.Deferrable.INITIALLY_IMMEDIATE
       }
