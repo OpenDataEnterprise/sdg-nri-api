@@ -24,25 +24,25 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     title: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     organization: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     url: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     date_published: {
       type: DataTypes.DATE,
     },
     image_url: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     tags: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
+      type: DataTypes.ARRAY(DataTypes.TEXT),
     },
     publish: {
       type: DataTypes.BOOLEAN,

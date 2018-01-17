@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     language_id: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       references: {
         model: sequelize.models.language,
         key: 'ietf_tag',

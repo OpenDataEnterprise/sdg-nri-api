@@ -4,11 +4,10 @@ module.exports = (sequelize, DataTypes) => {
   var Model = sequelize.define('country', {
     iso_alpha3: {
       type: DataTypes.CHAR(3),
-      field: 'iso_alpha3',
       primaryKey: true,
     },
     region_id: {
-      type: DataTypes.STRING,
+      type: DataTypes.CHAR(3),
       references: {
         model: sequelize.models.region,
         key: 'm49',
@@ -16,10 +15,10 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     income_group: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     name: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
   }, {
     tableName: 'country',
