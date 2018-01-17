@@ -28,9 +28,15 @@ app.use(jwt({
   credentialsRequired: false
 }));
 
-fs.readdirSync('./routes').forEach((file) => {
+fs.readdirSync('./routes/api/v1/').forEach((file) => {
   if (file !== '.gitkeep') {
-    app.use('/forest', require('./routes/' + file));
+    app.use('/api/v1', require('./routes/api/v1/' + file));
+  }
+});
+
+fs.readdirSync('./routes/forest').forEach((file) => {
+  if (file !== '.gitkeep') {
+    app.use('/forest', require('./routes/forest/' + file));
   }
 });
 
@@ -40,22 +46,5 @@ modelsDir: __dirname + '/models',
   authSecret: process.env.FOREST_AUTH_SECRET,
 sequelize: require('./models').sequelize
 }));
-
-app.get('/resources/', async (req, res, next) => {
-    const { Client } = require('pg');
-    const client = new Client({
-        connectionString: process.env.DATABASE_URL,
-        ssl: true,
-    });
-
-    try {
-        await client.connect();
-        const { rows } = await client.query('SELECT * FROM sdg.resource');
-        await client.end();
-        res.send(rows);
-    } catch (err) {
-        console.log(err);
-    }
-});
 
 module.exports = app;
