@@ -7,19 +7,19 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true,
     },
-    topic_id: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: sequelize.models.topic,
-        key: 'id',
-        deferrable: sequelize.Deferrable.INITIALLY_IMMEDIATE
-      }
-    },
     resource_id: {
       type: DataTypes.INTEGER,
       references: {
         model: sequelize.models.resource,
         key: 'uuid',
+        deferrable: sequelize.Deferrable.INITIALLY_IMMEDIATE
+      }
+    },
+    topic_id: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: sequelize.models.topic,
+        key: 'id',
         deferrable: sequelize.Deferrable.INITIALLY_IMMEDIATE
       }
     },

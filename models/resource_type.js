@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
     },
     name: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
   }, {
     tableName: 'resource_type',
@@ -17,9 +17,6 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     schema: process.env.DATABASE_SCHEMA,
   });
-
-  Model.associate = (models) => {
-  };
 
   return Model;
 };

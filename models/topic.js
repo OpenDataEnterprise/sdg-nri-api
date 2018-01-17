@@ -8,13 +8,13 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
     },
     tag: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     path: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
-    label: {
-      type: DataTypes.STRING,
+    name: {
+      type: DataTypes.TEXT,
     },
   }, {
     tableName: 'topic',
@@ -24,6 +24,10 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Model.associate = (models) => {
+    Model.belongsToMany(models.resource, {
+      through: 'topic_resources',
+      foreignKey: 'topic_id',
+    });
   };
 
   return Model;

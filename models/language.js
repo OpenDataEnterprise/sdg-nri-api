@@ -3,14 +3,14 @@
 module.exports = (sequelize, DataTypes) => {
   var Model = sequelize.define('language', {
     ietf_tag: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       primaryKey: true 
     },
     name: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     label: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
   }, {
     tableName: 'language',

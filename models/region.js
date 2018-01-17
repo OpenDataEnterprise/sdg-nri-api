@@ -3,14 +3,14 @@
 module.exports = (sequelize, DataTypes) => {
   var Model = sequelize.define('region', {
     m49: {
-      type: DataTypes.STRING,
+      type: DataTypes.CHAR(3),
       primaryKey: true 
     },
     path: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     name: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
   }, {
     tableName: 'region',
