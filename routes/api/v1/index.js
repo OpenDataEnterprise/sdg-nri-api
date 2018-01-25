@@ -1,10 +1,13 @@
 'use strict';
 const express = require('express');
 const router = express.Router();
+const cors = require('express-cors');
 const { check, validationResult } = require('express-validator/check');
 const { matchedData, sanitize } = require('express-validator/filter');
 const Liana = require('forest-express-sequelize');
 const models = require('../../../models');
+
+router.all('*', cors());
 
 router.get('/', (req, res) => {
   try {
