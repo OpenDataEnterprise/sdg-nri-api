@@ -68,7 +68,7 @@ router.get('/resources/', [
 
           if (filter.filteringField in models.resource.attributes) {
             // Add filter to direct filters.
-            filters[filterName] = req.query[filterName];
+            filters[filter.filteringField] = req.query[filterName];
           } else if ('association' in filter &&
             filter.association in models.resource.associations) {
             // Add filters to many-to-many association filters.
@@ -108,7 +108,7 @@ router.get('/resources/', [
           'date_published',
           'image_url',
           'description',
-          'publish',
+          'tags',
         ],
         include: associations,
         limit: limit,
