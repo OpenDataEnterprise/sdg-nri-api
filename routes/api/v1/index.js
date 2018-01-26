@@ -28,8 +28,8 @@ router.get('/resources/', [
 
     try {
       // Set parameter defaults here.
-      const limit = req.query.limit ? req.params.limit : 100;
-      const offset = req.query.offset ? req.params.offset : 0;
+      const limit = req.query.limit ? req.query.limit : 100;
+      const offset = req.query.offset ? req.query.offset : 0;
 
       // List detailing filter specifications.
       let filterList = {
