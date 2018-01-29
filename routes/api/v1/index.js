@@ -3,8 +3,9 @@ const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator/check');
 const { matchedData, sanitize } = require('express-validator/filter');
-const Liana = require('forest-express-sequelize');
+const squel = require('squel');
 const models = require('../../../models');
+const sequelize = models.sequelize;
 
 router.get('/', (req, res) => {
   try {
@@ -18,12 +19,11 @@ router.get('/', (req, res) => {
 router.get('/resources/', [
     check('limit').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
     check('offset').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
-    check('country').optional().isAlpha().withMessage('must contain only letters'),
   ], async (req, res, next) => {
     // Validate paramaters.
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.status(422).json({ errors: errors.mapped() }).send();
+      return res.status(422).json({ errors: errors.mapped() });
     }
 
     try {
@@ -88,40 +88,38 @@ router.get('/resources/', [
 
         // Only use the filter if there are filtering values provided.
         if (filterValues.length) {
-          let assocation = {};
-          assocation.model = models[filter.model];
-          assocation.attributes = filter.retrieveFields;
-          assocation.through = {
+          let association = {};
+          association.model = models[filter.model];
+          association.attributes = filter.retrieveFields;
+          association.through = {
             attributes: [],
           };
-          assocation.where = {};
-          assocation.where[filter.filteringField] = filterValues.split(',');
+          association.where = {};
+          association.where[filter.filteringField] = filterValues.split(',');
+          association.required = true;
 
-          associations.push(assocation);
+          associations.push(association);
         }
       }
 
-      models.resource.findAll({
-        attributes: [
-          'title',
-          'organization',
-          'url',
-          'date_published',
-          'image_url',
-          'description',
-          'tags',
-        ],
+      models.resource.findAndCountAll({
         include: associations,
         limit: limit,
         offset: offset,
         where: filters,
+        order: [
+          [sequelize.col('date_published'), 'DESC'],
+        ],
+        distinct: true,
+        subQuery: false,
         raw: false,
+        //logging: console.log,
       }).then((results) => {
         res.send(results);
       });
     } catch (err) {
       console.log(err);
-      res.status(500).send();
+      return res.status(500);
     }
   }
 );
@@ -361,14 +359,56 @@ router.get('/news/', [
     check('limit').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
     check('offset').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
   ], async (req, res, next) => {
+    // Validate paramaters.
     const errors = validationResult(req);
-
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.mapped() });
     }
 
     try {
-      models.news.findAll().then((values) => {
+      // Set parameter defaults here.
+      const limit = ('limit' in req.query) ? req.query.limit : 100;
+      const offset = ('offset' in req.query) ? req.query.offset : 0;
+
+      // List detailing filter specifications.
+      let filterList = {
+        'tags': {
+          filteringField: 'tags',
+          retrieveFields: [],
+        },
+      };
+
+      // Set filters.
+      let filters = {};
+
+      for (let filterName in filterList) {
+        if (filterName in req.query) {
+          let filter = filterList[filterName];
+
+          if (filter.filteringField in models.news.attributes) {
+            let filterValues = req.query[filterName].split(',');
+
+            console.log(filterValues);
+            // Add filter to direct filters.
+            if (Array.isArray(filterValues)) {
+              filters[filter.filteringField] = {
+                $contains: filterValues,
+              };
+            } else {
+              filters[filter.filteringField] = filterValues;
+            }
+          }
+          // Ignore unmatched filters.
+        }
+      }
+
+      console.log(filters);
+      models.news.findAndCountAll({
+        limit: limit,
+        offset: offset,
+        where: filters,
+        logging: console.log,
+      }).then((values) => {
         res.send(values);
       });
     } catch (err) {
@@ -380,8 +420,8 @@ router.get('/news/', [
 router.get('/news/:uuid', [
     check('uuid').isUUID().withMessage('must provide a valid UUID'),
   ], async (req, res, next) => {
+    // Validate parameters.
     const errors = validationResult(req);
-
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.mapped() });
     }
@@ -439,5 +479,27 @@ router.get('/events/:uuid', [
   }
 );
 
+router.get('/tags/news', async(req, res, next) => {
+  try {
+    let sql = squel.select()
+      .from('sdg.news n, unnest(n.tags) AS tag')
+      .field('tag')
+      .group('tag')
+      .order('tag')
+      .toString();
+    sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
+      .then((rows) => {
+        let unique_tags = [];
+        rows.map((row) => {
+          unique_tags.push(row.tag);
+        });
+
+        res.send(unique_tags);
+      });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+});
 
 module.exports = router;
