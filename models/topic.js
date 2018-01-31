@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     path: {
       type: DataTypes.TEXT,
     },
-    name: {
+    label: {
       type: DataTypes.TEXT,
     },
   }, {
