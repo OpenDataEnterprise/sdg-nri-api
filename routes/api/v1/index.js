@@ -181,7 +181,6 @@ router.get('/resource_types/:id', async (req, res, next) => {
   }
 );
 
-
 router.get('/topics/', [
     check('limit').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
     check('offset').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
@@ -193,9 +192,12 @@ router.get('/topics/', [
     }
 
     try {
-      models.topic.findAll().then((values) => {
-        res.send(values);
-      });
+      let sql = "SELECT array_to_json(array_agg(json_build_object('tag', topic.tag, 'label', topic.label, 'subtopics', (SELECT COALESCE(array_to_json(array_agg(subtopic)), '[]') FROM sdg.topic AS subtopic WHERE subtopic.path <@ topic.path AND subtopic.path <> topic.path)))) AS topic FROM sdg.topic WHERE topic.path ~ '*{,1}';";
+
+      sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
+        .then((rows) => {
+          res.send(rows[0].topic);
+        });
     } catch (err) {
       console.log(err);
     }
@@ -390,23 +392,30 @@ router.get('/news/', [
 
             console.log(filterValues);
             // Add filter to direct filters.
-            if (Array.isArray(filterValues)) {
+            if (filterName === 'tags' && Array.isArray(filterValues)) {
               filters[filter.filteringField] = {
-                $contains: filterValues,
+                $overlap: filterValues,
               };
             } else {
-              filters[filter.filteringField] = filterValues;
+              if (filter.operator) {
+                filters[filter.filteringField] = {};
+                filters[filter.filteringField][filter.operator] = filterValues;
+              } else {
+                filters[filter.filteringField] = filterValues;
+              }
             }
           }
           // Ignore unmatched filters.
         }
       }
 
-      console.log(filters);
       models.news.findAndCountAll({
         limit: limit,
         offset: offset,
         where: filters,
+        order: [
+          [sequelize.col('created_at'), 'DESC'],
+        ],
         logging: console.log,
       }).then((values) => {
         res.send(values);
@@ -442,14 +451,56 @@ router.get('/events/', [
     check('limit').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
     check('offset').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
   ], async (req, res, next) => {
+    // Validate parameters.
     const errors = validationResult(req);
-
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.mapped() });
     }
 
     try {
-      models.event.findAll().then((values) => {
+      // Set parameter defaults here.
+      const limit = ('limit' in req.query) ? req.query.limit : 100;
+      const offset = ('offset' in req.query) ? req.query.offset : 0;
+
+      // List detailing filter specifications.
+      let filterList = {
+        'tags': {
+          filteringField: 'tags',
+          retrieveFields: [],
+        },
+      };
+
+      // Set filters.
+      let filters = {};
+
+      for (let filterName in filterList) {
+        if (filterName in req.query) {
+          let filter = filterList[filterName];
+
+          if (filter.filteringField in models.events.attributes) {
+            let filterValues = req.query[filterName].split(',');
+
+            // Add filter to direct filters.
+            if (Array.isArray(filterValues)) {
+              filters[filter.filteringField] = {
+                $contains: filterValues,
+              };
+            } else {
+              filters[filter.filteringField] = filterValues;
+            }
+          }
+          // Ignore unmatched filters.
+        }
+      }
+
+      models.event.findAll({
+        limit: limit,
+        offset: offset,
+        where: filters,
+        order: [
+          [sequelize.col('start_time'), 'DESC'],
+        ],
+      }).then((values) => {
         res.send(values);
       });
     } catch (err) {
@@ -487,6 +538,7 @@ router.get('/tags/news', async(req, res, next) => {
       .group('tag')
       .order('tag')
       .toString();
+
     sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
       .then((rows) => {
         let unique_tags = [];
