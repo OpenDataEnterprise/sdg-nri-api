@@ -35,7 +35,7 @@ router.get('/resources/', [
       let filterList = {
         'type': {
           model: 'resource_type',
-          filteringField: 'resource_id',
+          filteringField: 'resource_type_id',
           retrieveFields: [],
         },
         'country': {
