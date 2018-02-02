@@ -17,11 +17,18 @@ router.get('/', (req, res) => {
 });
 
 router.get('/resources/', [
-    check('limit').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
-    check('offset').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
+    check('limit')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('must be a positive integer'),
+    check('offset')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('must be a positive integer'),
   ], async (req, res, next) => {
-    // Validate paramaters.
+    // Process validation results.
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.mapped() });
     }
@@ -31,17 +38,18 @@ router.get('/resources/', [
       const limit = req.query.limit ? req.query.limit : 100;
       const offset = req.query.offset ? req.query.offset : 0;
 
-      // List detailing filter specifications.
-      let filterList = {
+      // Filter specifications.
+      const filterList = {
+        'tags': {
+          filteringField: 'tags',
+        },
         'type': {
           model: 'resource_type',
           filteringField: 'resource_type_id',
-          retrieveFields: [],
         },
         'country': {
           model: 'country',
           filteringField: 'country_id',
-          retrieveFields: [],
         },
         'topic': {
           association: 'topics',
@@ -59,17 +67,34 @@ router.get('/resources/', [
 
       // Set filters.
       let filters = {
-        publish: true, // Default filter - only published resources.
+        publish: true, // Default filter for published resources only.
       };
       let assocFilters = {};
 
-      for (let filterName in filterList) {
+      for (const filterName in filterList) {
         if (filterName in req.query) {
-          let filter = filterList[filterName];
+          const filter = filterList[filterName];
+          const filterField = filter.filteringField;
+          let filterValue = req.query[filterName];
 
-          if (filter.filteringField in models.resource.attributes) {
+          if (filterField in models.resource.attributes) {
+            // If the field is defined in the model to be an array and the value
+            // is not given as an array, wrap the value in an array.
+            if ((models.resource.attributes[filterField].type.toString().indexOf('[]') > -1)
+              && !Array.isArray(filterValue)) {
+              filterValue = [filterValue];
+            }
+
             // Add filter to direct filters.
-            filters[filter.filteringField] = req.query[filterName];
+            if (Array.isArray(filterValue)) {
+              // The $overlap criterion results in inclusive filtering, while
+              // the $contains criterion results in exclusive filtering.
+              filters[filter.filteringField] = {
+                $overlap: filterValue,
+              };
+            } else {
+              filters[filter.filteringField] = filterValue;
+            }
           } else if ('association' in filter &&
             filter.association in models.resource.associations) {
             // Add filters to many-to-many association filters.
@@ -82,9 +107,9 @@ router.get('/resources/', [
       // Set filters for many-to-many relations.
       let associations = [];
 
-      for (let filterName in assocFilters) {
-        let filter = filterList[filterName];
-        let filterValues = assocFilters[filterName];
+      for (const filterName in assocFilters) {
+        const filter = filterList[filterName];
+        const filterValues = assocFilters[filterName];
 
         // Only use the filter if there are filtering values provided.
         if (filterValues.length) {
@@ -113,7 +138,6 @@ router.get('/resources/', [
         distinct: true,
         subQuery: false,
         raw: false,
-        //logging: console.log,
       }).then((results) => {
         res.send(results);
       });
@@ -125,8 +149,11 @@ router.get('/resources/', [
 );
 
 router.get('/resources/:uuid', [
-    check('uuid').isUUID().withMessage('must provide a valid UUID format ID'),
+    check('uuid')
+      .isUUID()
+      .withMessage('must provide a valid UUID format ID'),
   ], async (req, res, next) => {
+    // Process validation results.
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -134,7 +161,7 @@ router.get('/resources/:uuid', [
     }
 
     try {
-      let id = req.params.uuid;
+      const id = req.params.uuid;
 
       models.resource.findById(uuid).then((value) => {
         res.send(value);
@@ -146,6 +173,7 @@ router.get('/resources/:uuid', [
 );
 
 router.get('/resource_types/', async (req, res, next) => {
+    // Process validation results.
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -163,6 +191,7 @@ router.get('/resource_types/', async (req, res, next) => {
 );
 
 router.get('/resource_types/:id', async (req, res, next) => {
+    // Process validation results.
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -170,7 +199,7 @@ router.get('/resource_types/:id', async (req, res, next) => {
     }
 
     try {
-      let id = req.params.id;
+      const id = req.params.id;
 
       models.resource_type.findById(id).then((value) => {
         res.send(value);
@@ -182,9 +211,16 @@ router.get('/resource_types/:id', async (req, res, next) => {
 );
 
 router.get('/topics/', [
-    check('limit').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
-    check('offset').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
+    check('limit')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('must be a positive integer'),
+    check('offset')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('must be a positive integer'),
   ], async (req, res, next) => {
+    // Process validation results.
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -192,7 +228,7 @@ router.get('/topics/', [
     }
 
     try {
-      let sql = "SELECT array_to_json(array_agg(json_build_object('tag', topic.tag, 'label', topic.label, 'subtopics', (SELECT COALESCE(array_to_json(array_agg(subtopic)), '[]') FROM sdg.topic AS subtopic WHERE subtopic.path <@ topic.path AND subtopic.path <> topic.path)))) AS topic FROM sdg.topic WHERE topic.path ~ '*{,1}';";
+      const sql = "SELECT array_to_json(array_agg(json_build_object('tag', topic.tag, 'label', topic.label, 'subtopics', (SELECT COALESCE(array_to_json(array_agg(subtopic)), '[]') FROM sdg.topic AS subtopic WHERE subtopic.path <@ topic.path AND subtopic.path <> topic.path)))) AS topic FROM sdg.topic WHERE topic.path ~ '*{,1}';";
 
       sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
         .then((rows) => {
@@ -205,6 +241,7 @@ router.get('/topics/', [
 );
 
 router.get('/topics/:id', async (req, res, next) => {
+    // Process validation results.
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -212,7 +249,7 @@ router.get('/topics/:id', async (req, res, next) => {
     }
 
     try {
-      let id = req.params.id;
+      const id = req.params.id;
 
       models.topic.findById(id).then((value) => {
         res.send(value);
@@ -224,9 +261,16 @@ router.get('/topics/:id', async (req, res, next) => {
 );
 
 router.get('/languages/', [
-    check('limit').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
-    check('offset').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
+    check('limit')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('must be a positive integer'),
+    check('offset')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('must be a positive integer'),
   ], async (req, res, next) => {
+    // Process validation results.
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -244,6 +288,7 @@ router.get('/languages/', [
 );
 
 router.get('/languages/:id', async (req, res, next) => {
+    // Process validation results.
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -251,7 +296,7 @@ router.get('/languages/:id', async (req, res, next) => {
     }
 
     try {
-      let id = req.params.id;
+      const id = req.params.id;
 
       models.language.findById(id).then((value) => {
         res.send(value);
@@ -263,9 +308,16 @@ router.get('/languages/:id', async (req, res, next) => {
 );
 
 router.get('/regions/', [
-    check('limit').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
-    check('offset').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
+    check('limit')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('must be a positive integer'),
+    check('offset')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('must be a positive integer'),
   ], async (req, res, next) => {
+    // Process validation results.
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -273,8 +325,7 @@ router.get('/regions/', [
     }
 
     try {
-      models.region.findAll({
-      }).then((values) => {
+      models.region.findAll().then((values) => {
         res.send(values);
       });
     } catch (err) {
@@ -284,9 +335,10 @@ router.get('/regions/', [
 );
 
 router.get('/regions/:m49', [
-    check('m49', 'must provide a valid M49 format code')
+    check('m49')
       .isInt()
-      .isLength({ min: 3, max: 3 }),
+      .isLength({ min: 3, max: 3 })
+      .withMessage('must provide a valid M49 format code'),
   ], async (req, res, next) => {
     const errors = validationResult(req);
 
@@ -295,7 +347,7 @@ router.get('/regions/:m49', [
     }
 
     try {
-      let id = req.params.m49;
+      const id = req.params.m49;
 
       models.region.findById(id).then((value) => {
         res.send(value);
@@ -314,6 +366,7 @@ router.get('/countries/', [
       .optional()
       .isInt({ min: 0 }),
   ], async (req, res, next) => {
+    // Process validation results.
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -333,9 +386,10 @@ router.get('/countries/', [
 );
 
 router.get('/countries/:alpha3', [
-    check('alpha3', 'must provide a valid ISO 3166-1 Alpha 3 format country code')
+    check('alpha3')
       .isAlpha()
-      .isLength({ min: 3, max: 3 }),
+      .isLength({ min: 3, max: 3 })
+      .withMessage('must provide a valid ISO 3166-1 Alpha 3 format country code'),
   ], async (req, res, next) => {
     const errors = validationResult(req);
 
@@ -344,7 +398,7 @@ router.get('/countries/:alpha3', [
     }
 
     try {
-      let id = req.params.alpha3;
+      const id = req.params.alpha3;
 
       models.country.findById(id, {
         attributes: ['iso_alpha3', 'region_id', 'name'],
@@ -358,8 +412,14 @@ router.get('/countries/:alpha3', [
 );
 
 router.get('/news/', [
-    check('limit').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
-    check('offset').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
+    check('limit')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('must be a positive integer'),
+    check('offset')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('must be a positive integer'),
   ], async (req, res, next) => {
     // Validate paramaters.
     const errors = validationResult(req);
@@ -373,10 +433,9 @@ router.get('/news/', [
       const offset = ('offset' in req.query) ? req.query.offset : 0;
 
       // List detailing filter specifications.
-      let filterList = {
+      const filterList = {
         'tags': {
           filteringField: 'tags',
-          retrieveFields: [],
         },
       };
 
@@ -388,9 +447,8 @@ router.get('/news/', [
           let filter = filterList[filterName];
 
           if (filter.filteringField in models.news.attributes) {
-            let filterValues = req.query[filterName].split(',');
+            const filterValues = req.query[filterName].split(',');
 
-            console.log(filterValues);
             // Add filter to direct filters.
             if (filterName === 'tags' && Array.isArray(filterValues)) {
               filters[filter.filteringField] = {
@@ -416,7 +474,6 @@ router.get('/news/', [
         order: [
           [sequelize.col('created_at'), 'DESC'],
         ],
-        logging: console.log,
       }).then((values) => {
         res.send(values);
       });
@@ -427,16 +484,19 @@ router.get('/news/', [
 );
 
 router.get('/news/:uuid', [
-    check('uuid').isUUID().withMessage('must provide a valid UUID'),
+    check('uuid')
+      .isUUID()
+      .withMessage('must provide a valid UUID'),
   ], async (req, res, next) => {
-    // Validate parameters.
+    // Process validation results.
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.mapped() });
     }
 
     try {
-      let id = req.params.uuid;
+      const id = req.params.uuid;
 
       models.news.findById(uuid).then((value) => {
         res.send(value);
@@ -448,11 +508,18 @@ router.get('/news/:uuid', [
 );
 
 router.get('/events/', [
-    check('limit').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
-    check('offset').optional().isInt({ min: 0 }).withMessage('must be a positive integer'),
+    check('limit')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('must be a positive integer'),
+    check('offset')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('must be a positive integer'),
   ], async (req, res, next) => {
-    // Validate parameters.
+    // Process validation results.
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.mapped() });
     }
@@ -463,22 +530,21 @@ router.get('/events/', [
       const offset = ('offset' in req.query) ? req.query.offset : 0;
 
       // List detailing filter specifications.
-      let filterList = {
+      const filterList = {
         'tags': {
           filteringField: 'tags',
-          retrieveFields: [],
         },
       };
 
       // Set filters.
       let filters = {};
 
-      for (let filterName in filterList) {
+      for (const filterName in filterList) {
         if (filterName in req.query) {
           let filter = filterList[filterName];
 
           if (filter.filteringField in models.events.attributes) {
-            let filterValues = req.query[filterName].split(',');
+            const filterValues = req.query[filterName].split(',');
 
             // Add filter to direct filters.
             if (Array.isArray(filterValues)) {
@@ -510,8 +576,11 @@ router.get('/events/', [
 );
 
 router.get('/events/:uuid', [
-    check('uuid').isUUID().withMessage('must provide a valid UUID'),
+    check('uuid')
+      .isUUID()
+      .withMessage('must provide a valid UUID'),
   ], async (req, res, next) => {
+    // Process validation results.
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -519,7 +588,7 @@ router.get('/events/:uuid', [
     }
 
     try {
-      let id = req.params.uuid;
+      const id = req.params.uuid;
 
       models.event.findById(id).then((value) => {
         res.send(value);
@@ -532,7 +601,7 @@ router.get('/events/:uuid', [
 
 router.get('/tags/news', async(req, res, next) => {
   try {
-    let sql = squel.select()
+    const sql = squel.select()
       .from('sdg.news n, unnest(n.tags) AS tag')
       .field('tag')
       .group('tag')
