@@ -120,7 +120,7 @@ router.get('/resources/', [
             attributes: [],
           };
           association.where = {};
-          association.where[filter.filteringField] = filterValues.split(',');
+          association.where[filter.filteringField] = filterValues;
           association.required = true;
 
           associations.push(association);
