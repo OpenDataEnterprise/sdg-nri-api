@@ -78,20 +78,28 @@ router.get('/resources/', [
           let filterValue = req.query[filterName];
 
           if (filterField in models.resource.attributes) {
+            const isArrayField = (models.resource.attributes[filterField].type
+              .toString().indexOf('[]') > -1);
+
             // If the field is defined in the model to be an array and the value
             // is not given as an array, wrap the value in an array.
-            if ((models.resource.attributes[filterField].type.toString().indexOf('[]') > -1)
-              && !Array.isArray(filterValue)) {
+            if (isArrayField && !Array.isArray(filterValue)) {
               filterValue = [filterValue];
             }
 
             // Add filter to direct filters.
-            if (Array.isArray(filterValue)) {
+            if (isArrayField && Array.isArray(filterValue)) {
               // The $overlap criterion results in inclusive filtering, while
               // the $contains criterion results in exclusive filtering.
               filters[filter.filteringField] = {
                 $overlap: filterValue,
               };
+            } else if (Array.isArray(filterValue)) {
+              // If the field is defined as a single value, but the values are
+              // in an array, we want the $in criterion.
+              filters[filter.filteringField] = {
+                $in: filterValue,
+              }
             } else {
               filters[filter.filteringField] = filterValue;
             }
