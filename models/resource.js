@@ -53,6 +53,12 @@ module.exports = (sequelize, DataTypes) => {
     underscored: true,
     timestamps: true,
     schema: process.env.DATABASE_SCHEMA,
+    indexes: [
+      {
+        fields: ['tsv'],
+        using: 'gin',
+      },
+    ],
   });
 
   Model.associate = (models) => {

@@ -127,6 +127,23 @@ router.get('/resources/', [
         }
       }
 
+      // This depends on having a column on the table that holds the document
+      // vector (i.e. tsvector) of the columns to be available for search.
+      // Here, tsmatch is a custom PL/pgSQL convenience function.
+      if ('search' in req.query) {
+        let tsvectorColumn = 'tsv';
+
+        filters = {
+          $and: [
+            filters,
+            sequelize.fn('tsmatch',
+              sequelize.literal(tsvectorColumn),
+              sequelize.fn('plainto_tsquery', 'english', req.query.search)
+            )
+          ]
+        };
+      }
+
       models.resource.findAndCountAll({
         include: associations,
         limit: limit,
