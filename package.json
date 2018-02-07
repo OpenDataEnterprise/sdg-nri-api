@@ -6,6 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "aws-sdk": "^2.190.0",
     "body-parser": "~1.15.1",
     "chalk": "~1.1.3",
     "cookie-parser": "~1.4.3",
