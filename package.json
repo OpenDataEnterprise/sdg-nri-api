@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "prepare": "patch-package",
-    "heroku-prebuild": "yarn install --only=dev"
+    "prepare": "patch-package"
   },
   "dependencies": {
     "aws-sdk": "^2.190.0",
@@ -20,13 +19,11 @@
     "express-validator": "^4.3.0",
     "forest-express-sequelize": "^2.1.1",
     "morgan": "~1.7.0",
+    "patch-package": "^5.0.0",
+    "postinstall-prepare": "^1.0.1",
     "pg": "~6.1.0",
     "sequelize": "^4.8.0",
     "serve-favicon": "~2.3.0",
     "squel": "^5.12.0"
-  },
-  "devDependencies": {
-    "patch-package": "^5.0.0",
-    "postinstall-prepare": "^1.0.1"
   }
 }
