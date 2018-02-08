@@ -1,0 +1,13 @@
+patch-package
+--- a/node_modules/sequelize/lib/query-interface.js
++++ b/node_modules/sequelize/lib/query-interface.js
+@@ -1151,6 +1151,9 @@ class QueryInterface {
+       }
+ 
+       let result = data ? data[attributeSelector] : null;
++      if ('dataValues' in data) {
++        result = data.dataValues[attributeSelector];
++      }
+ 
+       if (options && options.dataType) {
+         const dataType = options.dataType;
