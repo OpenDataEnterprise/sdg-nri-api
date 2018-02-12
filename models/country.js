@@ -11,8 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       references: {
         model: sequelize.models.region,
         key: 'm49',
-        deferrable: sequelize.Deferrable.INITIALLY_IMMEDIATE,
-      }
+      },
     },
     income_group: {
       type: DataTypes.TEXT,
@@ -26,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     schema: process.env.DATABASE_SCHEMA,
   });
+  console.log(Model);
 
   Model.associate = (models) => {
     Model.belongsTo(models.region, {
@@ -35,4 +35,3 @@ module.exports = (sequelize, DataTypes) => {
 
   return Model;
 };
-

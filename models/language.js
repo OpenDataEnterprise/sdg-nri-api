@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   var Model = sequelize.define('language', {
     ietf_tag: {
       type: DataTypes.TEXT,
-      primaryKey: true 
+      primaryKey: true,
     },
     name: {
       type: DataTypes.TEXT,
@@ -28,4 +28,3 @@ module.exports = (sequelize, DataTypes) => {
 
   return Model;
 };
-

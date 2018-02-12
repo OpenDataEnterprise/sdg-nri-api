@@ -12,16 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       references: {
         model: sequelize.models.country,
         key: 'iso_alpha3',
-        deferrable: sequelize.Deferrable.INITIALLY_IMMEDIATE,
-      }
-    },
-    resource_type_id: {
-      type: DataTypes.UUID,
-      references: {
-        model: sequelize.models.resource_type,
-        key: 'id',
-        deferrable: sequelize.Deferrable.INITIALLY_IMMEDIATE,
-      }
+      },
     },
     title: {
       type: DataTypes.TEXT,
@@ -47,7 +38,7 @@ module.exports = (sequelize, DataTypes) => {
     publish: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-    }
+    },
   }, {
     tableName: 'resource',
     underscored: true,
@@ -65,8 +56,15 @@ module.exports = (sequelize, DataTypes) => {
     Model.belongsTo(models.country, {
       foreignKey: 'country_id',
     });
-    Model.belongsTo(models.resource_type, {
-      foreignKey: 'resource_type_id',
+    Model.belongsToMany(models.content_type, {
+      through: {
+        model: 'resource_content_types',
+        unique: true,
+      },
+      foreignKey: 'resource_id',
+      otherKey: 'resource_content_type_id',
+      constraints: true,
+      cascade: true,
     });
     Model.belongsToMany(models.language, {
       through: {
@@ -92,4 +90,3 @@ module.exports = (sequelize, DataTypes) => {
 
   return Model;
 };
-
