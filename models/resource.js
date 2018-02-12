@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
       },
       foreignKey: 'resource_id',
-      otherKey: 'resource_content_type_id',
+      otherKey: 'content_type_id',
       constraints: true,
       cascade: true,
     });
