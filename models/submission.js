@@ -12,13 +12,25 @@ module.exports = (sequelize, DataTypes) => {
       references: {
         model: sequelize.models.resource,
         key: 'uuid',
-        deferrable: sequelize.Deferrable.INITIALLY_IMMEDIATE,
-      }
+      },
     },
     submitter_name: {
       type: DataTypes.TEXT,
     },
     submitter_organization: {
+      type: DataTypes.TEXT,
+    },
+    submitter_title: {
+      type: DataTypes.TEXT,
+    },
+    submitter_country: {
+      type: DataTypes.CHAR(3),
+      references: {
+        model: sequelize.models.country,
+        key: 'iso_alpha3',
+      },
+    },
+    submitter_city: {
       type: DataTypes.TEXT,
     },
     submitter_email: {
@@ -30,7 +42,6 @@ module.exports = (sequelize, DataTypes) => {
     notes: {
       type: DataTypes.TEXT,
     },
-
   }, {
     tableName: 'submission',
     underscored: true,
@@ -42,8 +53,10 @@ module.exports = (sequelize, DataTypes) => {
     Model.belongsTo(models.resource, {
       foreignKey: 'resource_id',
     });
+    Model.belongsTo(models.country, {
+      foreignKey: 'country_id',
+    });
   };
 
   return Model;
 };
-

@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   var Model = sequelize.define('region', {
     m49: {
       type: DataTypes.CHAR(3),
-      primaryKey: true 
+      primaryKey: true,
     },
     path: {
       type: DataTypes.TEXT,
@@ -21,4 +21,3 @@ module.exports = (sequelize, DataTypes) => {
 
   return Model;
 };
-

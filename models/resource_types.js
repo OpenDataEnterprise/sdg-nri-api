@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-  var Model = sequelize.define('resource_languages', {
+  var Model = sequelize.define('resource_content_types', {
     resource_id: {
       type: DataTypes.UUID,
       primaryKey: true,
@@ -10,16 +10,16 @@ module.exports = (sequelize, DataTypes) => {
         key: 'uuid',
       },
     },
-    language_id: {
-      type: DataTypes.TEXT,
+    content_type_id: {
+      type: DataTypes.INTEGER,
       primaryKey: true,
       references: {
-        model: sequelize.models.language,
-        key: 'ietf_tag',
+        model: sequelize.models.content_type,
+        key: 'id',
       },
     },
   }, {
-    tableName: 'resource_languages',
+    tableName: 'resource_content_types',
     underscored: true,
     timestamps: false,
     schema: process.env.DATABASE_SCHEMA,
@@ -29,8 +29,8 @@ module.exports = (sequelize, DataTypes) => {
     Model.belongsTo(models.resource, {
       foreignKey: 'resource_id',
     });
-    Model.belongsTo(models.language, {
-      foreignKey: 'language_id',
+    Model.belongsTo(models.content_type, {
+      foreignKey: 'content_type_id',
     });
   };
 

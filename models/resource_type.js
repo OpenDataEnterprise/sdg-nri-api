@@ -1,10 +1,9 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-  var Model = sequelize.define('resource_type', {
+  var Model = sequelize.define('content_type', {
     id: {
       type: DataTypes.INTEGER,
-      field: 'id',
       primaryKey: true,
       autoIncrement: true,
     },
@@ -12,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
     },
   }, {
-    tableName: 'resource_type',
+    tableName: 'content_type',
     underscored: true,
     timestamps: false,
     schema: process.env.DATABASE_SCHEMA,
@@ -20,4 +19,3 @@ module.exports = (sequelize, DataTypes) => {
 
   return Model;
 };
-

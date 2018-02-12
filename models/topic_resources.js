@@ -2,26 +2,21 @@
 
 module.exports = (sequelize, DataTypes) => {
   var Model = sequelize.define('topic_resources', {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
     resource_id: {
       type: DataTypes.INTEGER,
+      primaryKey: true,
       references: {
         model: sequelize.models.resource,
         key: 'uuid',
-        deferrable: sequelize.Deferrable.INITIALLY_IMMEDIATE
-      }
+      },
     },
     topic_id: {
       type: DataTypes.INTEGER,
+      primaryKey: true,
       references: {
         model: sequelize.models.topic,
         key: 'id',
-        deferrable: sequelize.Deferrable.INITIALLY_IMMEDIATE
-      }
+      },
     },
   }, {
     tableName: 'topic_resources',
@@ -41,4 +36,3 @@ module.exports = (sequelize, DataTypes) => {
 
   return Model;
 };
-
