@@ -14,6 +14,13 @@ module.exports = (sequelize, DataTypes) => {
         key: 'uuid',
       },
     },
+    country_id: {
+      type: DataTypes.CHAR(3),
+      references: {
+        model: sequelize.models.country,
+        key: 'iso_alpha3',
+      },
+    },
     submitter_name: {
       type: DataTypes.TEXT,
     },
@@ -22,13 +29,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     submitter_title: {
       type: DataTypes.TEXT,
-    },
-    submitter_country: {
-      type: DataTypes.CHAR(3),
-      references: {
-        model: sequelize.models.country,
-        key: 'iso_alpha3',
-      },
     },
     submitter_city: {
       type: DataTypes.TEXT,
