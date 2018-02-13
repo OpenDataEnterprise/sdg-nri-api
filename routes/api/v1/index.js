@@ -6,10 +6,70 @@ const { matchedData, sanitize } = require('express-validator/filter');
 const squel = require('squel');
 const models = require('../../../models');
 const sequelize = models.sequelize;
+const AWS = require('aws-sdk');
+
+const AWSConfig = {
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  },
+  region: process.env.AWS_REGION,
+  apiVersion: '2010-12-01',
+};
 
 router.get('/', (req, res) => {
   try {
     res.status(200).send();
+  } catch (err) {
+    console.log(err);
+    res.status(500).send();
+  }
+});
+
+router.post('/contact-form', async (req, res, next) => {
+  console.log(req);
+
+  try {
+    const params = {
+      Destination: {
+        ToAddresses: [
+          'andy@odenterprise.org',
+        ],
+      },
+      Source: 'do-not-reply@odenterprise.org',
+      Message: {
+        Subject: {
+          Charset: 'UTF-8',
+          Data: 'SDG NRI Website Contact Form Submission',
+        },
+        Body: {
+          Text: {
+            Charset: 'UTF-8',
+            Data: JSON.stringify(req.body),
+          },
+        },
+      },
+    };
+
+    var sendPromise = new AWS.SES(AWSConfig).sendEmail(params).promise();
+
+    sendPromise.then(function(data) {
+      console.log(data.MessageId);
+      res.status(204).send();
+    }).catch(function(err) {
+      throw err;
+    });
+  } catch (err) {
+    console.error(err, err.stack);
+    res.status(500).send();
+  }
+});
+
+router.post('/submission-form', async (req, res, next) => {
+  console.log(req);
+
+  try {
+    res.status(204).send();
   } catch (err) {
     console.log(err);
     res.status(500).send();
