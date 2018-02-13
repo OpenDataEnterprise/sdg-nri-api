@@ -25,7 +25,6 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
     schema: process.env.DATABASE_SCHEMA,
   });
-  console.log(Model);
 
   Model.associate = (models) => {
     Model.belongsTo(models.region, {
