@@ -77,10 +77,45 @@ router.post('/contact-form', async (req, res, next) => {
 });
 
 router.post('/submission-form', async (req, res, next) => {
-  console.log(req);
-
   try {
-    res.status(204).send();
+    // Sanitize form inputs.
+    sanitizeBody('first-name').stripLow().trim().escape();
+    sanitizeBody('last-name').stripLow().trim().escape();
+    sanitizeBody('email').normalizeEmail();
+    sanitizeBody('organization').stripLow().trim().escape();
+    sanitizeBody('title').stripLow().trim().escape();
+    sanitizeBody('country').stripLow().trim().escape();
+    sanitizeBody('city').stripLow().trim().escape();
+    sanitizeBody('resource-title').stripLow().trim().escape();
+    sanitizeBody('resource-organization').stripLow().trim().escape();
+    sanitizeBody('resource-link').stripLow().trim();
+    req.body['resource-link'] = encodeURI(req.body['resource-link']);
+    sanitizeBody('resource-description').stripLow().trim().escape();
+    sanitizeBody('resource-topics.*').stripLow().trim().escape();
+    sanitizeBody('resource-additional-info').stripLow().trim().escape();
+
+    return sequelize.transaction(function (t) {
+      return models.resource.create({
+        title: req.body['resource-title'],
+        organization: req.body['resource-organization'],
+        url: req.body['resource-link'],
+        description: req.body['resource-description'],
+      }, { transaction: t }).then(function (resource) {
+        console.log(resource.dataValues.uuid);
+        return models.submission.create({
+          resource_id: resource.dataValues.uuid,
+          country_id: req.body['country'],
+          submitter_name: req.body['first-name'] + ' ' + req.body['last-name'],
+          submitter_organization: req.body['organization'],
+          submitter_title: req.body['title'],
+          submitter_email: req.body['email'],
+          submitter_city: req.body['city'],
+          notes: req.body['resource-additional-info'],
+        }, { transaction: t });
+      });
+    }).then(function (submission) {
+      res.status(204).send();
+    });
   } catch (err) {
     console.log(err);
     res.status(500).send();
