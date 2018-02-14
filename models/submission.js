@@ -30,14 +30,19 @@ module.exports = (sequelize, DataTypes) => {
     submitter_title: {
       type: DataTypes.TEXT,
     },
-    submitter_city: {
+    submitter_email: {
       type: DataTypes.TEXT,
     },
-    submitter_email: {
+    submitter_city: {
       type: DataTypes.TEXT,
     },
     status: {
       type: DataTypes.TEXT,
+      references: {
+        model: sequelize.models.submission_status,
+        key: 'status',
+      },
+      defaultValue: 'Unreviewed',
     },
     notes: {
       type: DataTypes.TEXT,
@@ -55,6 +60,9 @@ module.exports = (sequelize, DataTypes) => {
     });
     Model.belongsTo(models.country, {
       foreignKey: 'country_id',
+    });
+    Model.belongsTo(models.submission_status, {
+      foreignKey: 'status',
     });
   };
 
