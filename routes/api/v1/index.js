@@ -2,11 +2,12 @@
 const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator/check');
-const { matchedData, sanitize } = require('express-validator/filter');
+const { matchedData, sanitizeBody } = require('express-validator/filter');
 const squel = require('squel');
 const models = require('../../../models');
 const sequelize = models.sequelize;
 const AWS = require('aws-sdk');
+const { contactFormTemplate } = require('../../../templates/contact-form');
 
 const AWSConfig = {
   credentials: {
@@ -27,31 +28,41 @@ router.get('/', (req, res) => {
 });
 
 router.post('/contact-form', async (req, res, next) => {
-  console.log(req);
-
   try {
-    const params = {
-      Destination: {
-        ToAddresses: [
-          'andy@odenterprise.org',
-        ],
-      },
-      Source: 'do-not-reply@odenterprise.org',
-      Message: {
-        Subject: {
-          Charset: 'UTF-8',
-          Data: 'SDG NRI Website Contact Form Submission',
-        },
-        Body: {
-          Text: {
-            Charset: 'UTF-8',
-            Data: JSON.stringify(req.body),
-          },
-        },
-      },
+    // Sanitize form inputs.
+    sanitizeBody('first-name').stripLow().trim().escape();
+    sanitizeBody('last-name').stripLow().trim().escape();
+    sanitizeBody('email').normalizeEmail();
+    sanitizeBody('organization').stripLow().trim().escape();
+    sanitizeBody('title').stripLow().trim().escape();
+    sanitizeBody('country').stripLow().trim().escape();
+    sanitizeBody('city').stripLow().trim().escape();
+    sanitizeBody('message').stripLow().trim().escape();
+    sanitizeBody('interests.*').stripLow().trim().escape();
+
+    // Map form input to template variables.
+    const templateData = {
+      firstName: req.body['first-name'],
+      lastName: req.body['last-name'],
+      emailAddress: req.body['email'],
+      organization: req.body['organization'],
+      title: req.body['title'],
+      country: req.body['country'],
+      city: req.body['city'],
+      message: req.body['message'],
+      interests: req.body['interests'],
     };
 
-    var sendPromise = new AWS.SES(AWSConfig).sendEmail(params).promise();
+    const params = {
+      Destination: {
+        ToAddresses: process.env.CONTACT_EMAILS.split(','),
+      },
+      Source: process.env.SENDER_EMAIL,
+      Template: 'ContactFormTemplate',
+      TemplateData: JSON.stringify(templateData),
+    };
+
+    var sendPromise = new AWS.SES(AWSConfig).sendTemplatedEmail(params).promise();
 
     sendPromise.then(function(data) {
       console.log(data.MessageId);
