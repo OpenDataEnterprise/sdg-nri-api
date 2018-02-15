@@ -101,7 +101,6 @@ router.post('/submission-form', async (req, res, next) => {
         url: req.body['resource-link'],
         description: req.body['resource-description'],
       }, { transaction: t }).then(function (resource) {
-        console.log(resource.dataValues.uuid);
         return models.submission.create({
           resource_id: resource.dataValues.uuid,
           country_id: req.body['country'],
@@ -303,7 +302,7 @@ router.get('/resources/:uuid', [
   }
 );
 
-router.get('/resource_types/', async (req, res, next) => {
+router.get('/content_types/', async (req, res, next) => {
     // Process validation results.
     const errors = validationResult(req);
 
@@ -312,7 +311,7 @@ router.get('/resource_types/', async (req, res, next) => {
     }
 
     try {
-      models.resource_type.findAll().then((values) => {
+      models.content_type.findAll().then((values) => {
         res.send(values);
       });
     } catch (err) {
