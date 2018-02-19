@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         key: 'uuid',
       },
     },
-    country_id: {
+    submitter_country_id: {
       type: DataTypes.CHAR(3),
       references: {
         model: sequelize.models.country,
@@ -44,6 +44,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       defaultValue: 'Unreviewed',
     },
+    tags: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
+    },
     notes: {
       type: DataTypes.TEXT,
     },
@@ -59,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'resource_id',
     });
     Model.belongsTo(models.country, {
-      foreignKey: 'country_id',
+      foreignKey: 'submitter_country_id',
     });
     Model.belongsTo(models.submission_status, {
       foreignKey: 'status',
