@@ -65,7 +65,7 @@ router.post('/contact-form', async (req, res, next) => {
     var sendPromise = new AWS.SES(AWSConfig).sendTemplatedEmail(params).promise();
 
     sendPromise.then(function(data) {
-      res.writeHead(303, {'Location': 'http://localhost:4000/thank-you/contact'});
+      res.writeHead(303, {'Location': process.env.SITE_URL + 'thank-you/contact'});
       res.end();
     }).catch(function(err) {
       throw err;
@@ -141,7 +141,7 @@ router.post('/submission-form', async (req, res, next) => {
       var sendPromise = new AWS.SES(AWSConfig).sendTemplatedEmail(params).promise();
 
       sendPromise.then(function(data) {
-        res.writeHead(303, {'Location': 'http://localhost:4000/thank-you/resource'});
+        res.writeHead(303, {'Location': process.env.SITE_URL + 'thank-you/resource'});
         res.end();
       }).catch(function(err) {
         throw err;
