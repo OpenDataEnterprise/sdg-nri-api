@@ -92,7 +92,6 @@ router.post('/submission-form', async (req, res, next) => {
     req.body['resource-link'] = encodeURI(req.body['resource-link']);
     sanitizeBody('resource-description').stripLow().trim().escape();
     sanitizeBody('resource-topics.*').stripLow().trim().escape();
-    sanitizeBody('resource-topics.tags').stripLow().trim().escape();
     sanitizeBody('resource-additional-info').stripLow().trim().escape();
 
     return sequelize.transaction(function (t) {
@@ -110,7 +109,7 @@ router.post('/submission-form', async (req, res, next) => {
           submitter_title: req.body['title'],
           submitter_email: req.body['email'],
           submitter_city: req.body['city'],
-          tags: req.body['tags'],
+          tags: req.body['resource-topics'],
           notes: req.body['resource-additional-info'],
         }, { transaction: t });
       });
