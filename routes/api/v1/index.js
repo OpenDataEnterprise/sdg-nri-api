@@ -141,7 +141,7 @@ router.post('/submission-form', async (req, res, next) => {
       var sendPromise = new AWS.SES(AWSConfig).sendTemplatedEmail(params).promise();
 
       sendPromise.then(function(data) {
-        res.writeHead(303, {'Location': process.env.SITE_URL + 'thank-you/resource'});
+        res.writeHead(303, {'Location': process.env.SITE_URL + 'thank-you/submit-resource'});
         res.end();
       }).catch(function(err) {
         throw err;
