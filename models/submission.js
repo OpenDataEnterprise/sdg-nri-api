@@ -14,13 +14,6 @@ module.exports = (sequelize, DataTypes) => {
         key: 'uuid',
       },
     },
-    submitter_country_id: {
-      type: DataTypes.CHAR(3),
-      references: {
-        model: sequelize.models.country,
-        key: 'iso_alpha3',
-      },
-    },
     submitter_name: {
       type: DataTypes.TEXT,
     },
@@ -33,16 +26,23 @@ module.exports = (sequelize, DataTypes) => {
     submitter_email: {
       type: DataTypes.TEXT,
     },
+    submitter_country_id: {
+      type: DataTypes.CHAR(3),
+      references: {
+        model: sequelize.models.country,
+        key: 'iso_alpha3',
+      },
+    },
     submitter_city: {
       type: DataTypes.TEXT,
     },
-    status: {
+    status_id: {
       type: DataTypes.TEXT,
       references: {
         model: sequelize.models.submission_status,
-        key: 'status',
+        key: 'id',
       },
-      defaultValue: 'Unreviewed',
+      defaultValue: 1,
     },
     tags: {
       type: DataTypes.ARRAY(DataTypes.TEXT),
@@ -65,7 +65,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'submitter_country_id',
     });
     Model.belongsTo(models.submission_status, {
-      foreignKey: 'status',
+      foreignKey: 'status_id',
     });
   };
 
