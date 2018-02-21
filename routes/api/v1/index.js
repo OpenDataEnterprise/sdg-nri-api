@@ -50,14 +50,14 @@ router.post('/contact-form', async (req, res, next) => {
       country: req.body['country'],
       city: req.body['city'],
       message: req.body['message'],
-      interests: req.body['interests'],
+      interests: req.body['interests'].join(", "),
     };
 
     const params = {
       Destination: {
-        ToAddresses: process.env.CONTACT_EMAILS.split(','),
+        ToAddresses: process.env.RECEIVE_CONTACT_FORM_EMAILS.split(','),
       },
-      Source: process.env.SENDER_EMAIL,
+      Source: process.env.ALERT_SENDER_EMAIL,
       Template: 'ContactFormTemplate',
       TemplateData: JSON.stringify(templateData),
     };
@@ -65,8 +65,8 @@ router.post('/contact-form', async (req, res, next) => {
     var sendPromise = new AWS.SES(AWSConfig).sendTemplatedEmail(params).promise();
 
     sendPromise.then(function(data) {
-      console.log(data.MessageId);
-      res.status(204).send();
+      res.writeHead(303, {'Location': 'http://localhost:4000/thank-you/contact'});
+      res.end();
     }).catch(function(err) {
       throw err;
     });
@@ -92,6 +92,7 @@ router.post('/submission-form', async (req, res, next) => {
     req.body['resource-link'] = encodeURI(req.body['resource-link']);
     sanitizeBody('resource-description').stripLow().trim().escape();
     sanitizeBody('resource-topics.*').stripLow().trim().escape();
+    sanitizeBody('resource-topics.tags').stripLow().trim().escape();
     sanitizeBody('resource-additional-info').stripLow().trim().escape();
 
     return sequelize.transaction(function (t) {
@@ -103,17 +104,48 @@ router.post('/submission-form', async (req, res, next) => {
       }, { transaction: t }).then(function (resource) {
         return models.submission.create({
           resource_id: resource.dataValues.uuid,
-          country_id: req.body['country'],
+          submitter_country_id: req.body['country'],
           submitter_name: req.body['first-name'] + ' ' + req.body['last-name'],
           submitter_organization: req.body['organization'],
           submitter_title: req.body['title'],
           submitter_email: req.body['email'],
           submitter_city: req.body['city'],
+          tags: req.body['tags'],
           notes: req.body['resource-additional-info'],
         }, { transaction: t });
       });
     }).then(function (submission) {
-      res.status(204).send();
+      // Map form input to template variables.
+      const templateData = {
+        submission_uuid: submission.dataValues.uuid,
+        resource_uuid: submission.dataValues.resource_id,
+        firstName: req.body['first-name'],
+        lastName: req.body['last-name'],
+        emailAddress: req.body['email'],
+        organization: req.body['organization'],
+        title: req.body['title'],
+        country: req.body['country'],
+        city: req.body['city'],
+        notes: req.body['resource-additional-info'],
+      };
+
+      const params = {
+        Destination: {
+          ToAddresses: process.env.RECEIVE_RESOURCE_FORM_EMAILS.split(','),
+        },
+        Source: process.env.ALERT_SENDER_EMAIL,
+        Template: 'ResourceFormTemplate',
+        TemplateData: JSON.stringify(templateData),
+      };
+
+      var sendPromise = new AWS.SES(AWSConfig).sendTemplatedEmail(params).promise();
+
+      sendPromise.then(function(data) {
+        res.writeHead(303, {'Location': 'http://localhost:4000/thank-you/resource'});
+        res.end();
+      }).catch(function(err) {
+        throw err;
+      });
     });
   } catch (err) {
     console.log(err);
