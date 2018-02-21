@@ -16,7 +16,7 @@ const templateName = 'ResourceFormTemplate';
 const htmlTemplate = [
   'A new resource submission has been received. Please log into ',
   '<a href="https://app.forestadmin.com/">Forest</a>',
-  ' for further details and action.<br>',
+  ' for further details and action.<br><br>',
   '<bold>Submission UUID:</bold> {{ submission_uuid }}<br>',
   '<bold>Resource UUID:</bold> {{ resource_uuid }}<br>',
   '<bold>Name:</bold> {{ firstName }} {{ lastName }}<br>',
@@ -30,15 +30,15 @@ const htmlTemplate = [
 const textTemplate = [
   'A new resource submission has been received. Please log into ',
   '<a href="https://app.forestadmin.com/">Forest</a>',
-  ' for further details and action.\n',
+  ' for further details and action.\n\n',
   'Submission UUID: {{ submission_uuid }}\n',
-  'Resource UUID: {{ resource_uuid }}',
+  'Resource UUID: {{ resource_uuid }}\n',
   'Name: {{ firstName }} {{ lastName }}\n',
   'E-mail address: {{ emailAddress }}\n',
   'Organization: {{ organization }}\n',
   'Title: {{ title }}\n',
   'Country: {{ country }}\n',
-  'City: {{ city }}\n',
+  'City: {{ city }}',
 ];
 
 const resourceFormTemplate = {
