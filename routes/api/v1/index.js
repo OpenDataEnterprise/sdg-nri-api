@@ -50,7 +50,7 @@ router.post('/contact-form', async (req, res, next) => {
       country: req.body['country'],
       city: req.body['city'],
       message: req.body['message'],
-      interests: req.body['interests'].join(", "),
+      interests: req.body['interests'],
     };
 
     const params = {
