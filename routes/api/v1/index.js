@@ -116,8 +116,14 @@ router.post('/submission-form', async (req, res, next) => {
     }).then(function (submission) {
       // Map form input to template variables.
       const templateData = {
-        submission_uuid: submission.dataValues.uuid,
-        resource_uuid: submission.dataValues.resource_id,
+        submissionUUID: submission.dataValues.uuid,
+        resourceUUID: submission.dataValues.resource_id,
+        resourceTitle: req.body['resource-title'],
+        resourceOrganization: req.body['resource-organization'],
+        resourceURL: req.body['resource-link'],
+        resourceDescription: req.body['resource-description'],
+        resourceTags: req.body['resource-topics'],
+        additionalInfo: req.body['resource-additional-info'],
         firstName: req.body['first-name'],
         lastName: req.body['last-name'],
         emailAddress: req.body['email'],
@@ -125,7 +131,6 @@ router.post('/submission-form', async (req, res, next) => {
         title: req.body['title'],
         country: req.body['country'],
         city: req.body['city'],
-        notes: req.body['resource-additional-info'],
       };
 
       const params = {

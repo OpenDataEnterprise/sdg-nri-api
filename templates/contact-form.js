@@ -14,14 +14,14 @@ const AWSConfig = {
 const templateName = 'ContactFormTemplate';
 
 const htmlTemplate = [
-  '<bold>Name:</bold> {{ firstName }} {{ lastName }}<br>',
-  '<bold>E-mail address:</bold> {{ emailAddress }}<br>',
-  '<bold>Organization:</bold> {{ organization }}<br>',
-  '<bold>Title:</bold> {{ title }}<br>',
-  '<bold>Country:</bold> {{ country }}<br>',
-  '<bold>City:</bold> {{ city }}<br>',
-  '<bold>Message:</bold> {{ message }}<br>',
-  '<bold>I am interested in:</bold> {{ interests }}',
+  '<b>Name:</b> {{ firstName }} {{ lastName }}<br>',
+  '<b>E-mail address:</b> {{ emailAddress }}<br>',
+  '<b>Organization:</b> {{ organization }}<br>',
+  '<b>Title:</b> {{ title }}<br>',
+  '<b>Country:</b> {{ country }}<br>',
+  '<b>City:</b> {{ city }}<br>',
+  '<b>Message:</b> {{ message }}<br>',
+  '<b>I am interested in:</b> {{ interests }}',
 ];
 
 const textTemplate = [
