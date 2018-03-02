@@ -40,6 +40,10 @@ router.post('/contact-form', async (req, res, next) => {
     sanitizeBody('message').stripLow().trim().escape();
     sanitizeBody('interests.*').stripLow().trim().escape();
 
+    // Handle empty array (i.e. checkboxes not selected).
+    req.body['interests'] = (typeof req.body['interests'] !== 'undefined')
+        ? req.body['interests'] : [];
+
     // Map form input to template variables.
     const templateData = {
       firstName: req.body['first-name'],
@@ -50,7 +54,7 @@ router.post('/contact-form', async (req, res, next) => {
       country: req.body['country'],
       city: req.body['city'],
       message: req.body['message'],
-      interests: req.body['interests'],
+      interests: req.body['interests'].join(', '),
     };
 
     const params = {
@@ -114,6 +118,10 @@ router.post('/submission-form', async (req, res, next) => {
         }, { transaction: t });
       });
     }).then(function (submission) {
+      // Handle empty array (i.e. checkboxes not selected).
+      req.body['resource-topics'] = (typeof req.body['resource-topics'] !== 'undefined')
+          ? req.body['resource-topics'] : [];
+
       // Map form input to template variables.
       const templateData = {
         submissionUUID: submission.dataValues.uuid,
@@ -122,7 +130,7 @@ router.post('/submission-form', async (req, res, next) => {
         resourceOrganization: req.body['resource-organization'],
         resourceURL: req.body['resource-link'],
         resourceDescription: req.body['resource-description'],
-        resourceTags: req.body['resource-topics'],
+        resourceTags: req.body['resource-topics'].join(', '),
         additionalInfo: req.body['resource-additional-info'],
         firstName: req.body['first-name'],
         lastName: req.body['last-name'],
