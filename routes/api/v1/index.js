@@ -22,7 +22,7 @@ router.get('/', (req, res) => {
   try {
     res.status(200).send();
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).send();
   }
 });
@@ -160,7 +160,7 @@ router.post('/submission-form', async (req, res, next) => {
       });
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).send();
   }
 });
@@ -316,7 +316,7 @@ router.get('/resources/', [
         res.send(results);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return res.status(500);
     }
   }
@@ -341,7 +341,7 @@ router.get('/resources/:uuid', [
         res.send(value);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -359,7 +359,7 @@ router.get('/content_types/', async (req, res, next) => {
         res.send(values);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -379,7 +379,7 @@ router.get('/resource_types/:id', async (req, res, next) => {
         res.send(value);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -409,7 +409,7 @@ router.get('/topics/', [
           res.send(rows[0].topic);
         });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -429,7 +429,7 @@ router.get('/topics/:id', async (req, res, next) => {
         res.send(value);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -456,7 +456,7 @@ router.get('/languages/', [
         res.send(values);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -476,7 +476,7 @@ router.get('/languages/:id', async (req, res, next) => {
         res.send(value);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -503,7 +503,7 @@ router.get('/regions/', [
         res.send(values);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -527,7 +527,7 @@ router.get('/regions/:m49', [
         res.send(value);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -554,7 +554,7 @@ router.get('/countries/', [
         res.send(values);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -580,7 +580,7 @@ router.get('/countries/:alpha3', [
         res.send(value);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -652,7 +652,7 @@ router.get('/news/', [
         res.send(values);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -676,7 +676,7 @@ router.get('/news/:uuid', [
         res.send(value);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -744,7 +744,7 @@ router.get('/events/', [
         res.send(values);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -768,7 +768,7 @@ router.get('/events/:uuid', [
         res.send(value);
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 );
@@ -792,7 +792,7 @@ router.get('/tags/news', async(req, res, next) => {
         res.send(unique_tags);
       });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).send(err);
   }
 });
