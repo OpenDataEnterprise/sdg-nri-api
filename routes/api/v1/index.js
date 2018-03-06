@@ -41,8 +41,12 @@ router.post('/contact-form', async (req, res, next) => {
     sanitizeBody('interests.*').stripLow().trim().escape();
 
     // Handle empty array (i.e. checkboxes not selected).
+    // Must give at least a default value or else e-mail alerts will not send.
     req.body['interests'] = (typeof req.body['interests'] !== 'undefined')
         ? req.body['interests'] : [];
+    req.body['interests'] = Array.isArray(req.body['interests']) ?
+      req.body['interests'] : [req.body['interests']]
+
 
     // Map form input to template variables.
     const templateData = {
@@ -119,8 +123,11 @@ router.post('/submission-form', async (req, res, next) => {
       });
     }).then(function (submission) {
       // Handle empty array (i.e. checkboxes not selected).
-      req.body['resource-topics'] = (typeof req.body['resource-topics'] !== 'undefined')
-          ? req.body['resource-topics'] : [];
+      // Must give at least a default value or else e-mail alerts will not send.
+      req.body['resource-topics'] = (typeof req.body['resource-topics'] !== 'undefined') ?
+        req.body['resource-topics'] : [];
+      req.body['resource-topics'] = Array.isArray(req.body['resource-topics']) ?
+        req.body['resource-topics'] : [req.body['resource-topics']]
 
       // Map form input to template variables.
       const templateData = {
