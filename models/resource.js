@@ -56,6 +56,16 @@ module.exports = (sequelize, DataTypes) => {
     Model.belongsTo(models.country, {
       foreignKey: 'country_id',
     });
+    Model.belongsToMany(models.topic, {
+      through: {
+        model: 'resource_topics',
+        unique: true,
+      },
+      foreignKey: 'resource_id',
+      otherKey: 'topic_id',
+      constraints: true,
+      cascade: true,
+    });
     Model.belongsToMany(models.content_type, {
       through: {
         model: 'resource_content_types',
@@ -73,16 +83,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       foreignKey: 'resource_id',
       otherKey: 'language_id',
-      constraints: true,
-      cascade: true,
-    });
-    Model.belongsToMany(models.topic, {
-      through: {
-        model: 'topic_resources',
-        unique: true,
-      },
-      foreignKey: 'resource_id',
-      otherKey: 'topic_id',
       constraints: true,
       cascade: true,
     });

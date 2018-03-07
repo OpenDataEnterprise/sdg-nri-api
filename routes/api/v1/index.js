@@ -210,7 +210,7 @@ router.get('/resources/', [
         'topic': {
           association: 'topics',
           model: 'topic',
-          filteringField: 'tag',
+          filteringField: 'topic',
           retrieveFields: ['id'],
         },
         'language': {
@@ -409,7 +409,7 @@ router.get('/topics/', [
     }
 
     try {
-      const sql = "SELECT array_to_json(array_agg(json_build_object('tag', topic.tag, 'label', topic.label, 'subtopics', (SELECT COALESCE(array_to_json(array_agg(subtopic)), '[]') FROM sdg.topic AS subtopic WHERE subtopic.path <@ topic.path AND subtopic.path <> topic.path)))) AS topic FROM sdg.topic WHERE topic.path ~ '*{,1}';";
+      const sql = "SELECT array_to_json(array_agg(json_build_object('topic', topic.topic, 'label', topic.label, 'subtopics', (SELECT COALESCE(array_to_json(array_agg(subtopic)), '[]') FROM sdg.topic AS subtopic WHERE subtopic.path <@ topic.path AND subtopic.path <> topic.path)))) AS topic FROM sdg.topic WHERE topic.path ~ '*{,1}';";
 
       sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
         .then((rows) => {
