@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-  var Model = sequelize.define('topic_resources', {
+  var Model = sequelize.define('resource_topics', {
     resource_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
   }, {
-    tableName: 'topic_resources',
+    tableName: 'resource_topics',
     underscored: true,
     timestamps: false,
     schema: process.env.DATABASE_SCHEMA,

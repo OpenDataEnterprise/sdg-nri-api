@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true,
     },
-    tag: {
+    topic: {
       type: DataTypes.TEXT,
     },
     path: {
@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Model.associate = (models) => {
     Model.belongsToMany(models.resource, {
-      through: 'topic_resources',
+      through: 'resource_topics',
       foreignKey: 'topic_id',
     });
   };
