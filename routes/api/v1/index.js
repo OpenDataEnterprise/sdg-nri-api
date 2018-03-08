@@ -199,13 +199,15 @@ router.get('/resources/', [
         'tags': {
           filteringField: 'tags',
         },
-        'type': {
-          model: 'resource_type',
-          filteringField: 'resource_type_id',
-        },
         'country': {
           model: 'country',
           filteringField: 'country_id',
+        },
+        'type': {
+          association: 'content_types',
+          model: 'content_type',
+          filteringField: 'id',
+          retrieveFields: ['id'],
         },
         'topic': {
           association: 'topics',
@@ -362,16 +364,19 @@ router.get('/content_types/', async (req, res, next) => {
     }
 
     try {
-      models.content_type.findAll().then((values) => {
-        res.send(values);
-      });
+      const sql = "SELECT array_to_json(array_agg(json_build_object('id', id, 'name', name))) AS content_type FROM sdg.content_type WHERE id IN (SELECT DISTINCT(id) FROM sdg.content_type INNER JOIN sdg.resource_content_types ON id = content_type_id);";
+
+      sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
+        .then((rows) => {
+          res.send(rows[0].content_type);
+        });
     } catch (err) {
       console.error(err);
     }
   }
 );
 
-router.get('/resource_types/:id', async (req, res, next) => {
+router.get('/content_types/:id', async (req, res, next) => {
     // Process validation results.
     const errors = validationResult(req);
 
@@ -382,7 +387,7 @@ router.get('/resource_types/:id', async (req, res, next) => {
     try {
       const id = req.params.id;
 
-      models.resource_type.findById(id).then((value) => {
+      models.content_type.findById(id).then((value) => {
         res.send(value);
       });
     } catch (err) {
