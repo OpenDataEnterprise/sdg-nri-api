@@ -79,7 +79,7 @@ router.post('/contact-form', async (req, res, next) => {
       throw err;
     });
   } catch (err) {
-    console.error(err, err.stack);
+    console.error(err);
     res.status(500).send();
   }
 });
@@ -351,6 +351,7 @@ router.get('/resources/:uuid', [
       });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -372,6 +373,7 @@ router.get('/content_types/', async (req, res, next) => {
         });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -392,6 +394,7 @@ router.get('/content_types/:id', async (req, res, next) => {
       });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -422,6 +425,7 @@ router.get('/topics/', [
         });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -442,6 +446,7 @@ router.get('/topics/:id', async (req, res, next) => {
       });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -472,6 +477,7 @@ router.get('/languages/', [
         });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -492,6 +498,7 @@ router.get('/languages/:id', async (req, res, next) => {
       });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -519,6 +526,7 @@ router.get('/regions/', [
       });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -543,6 +551,7 @@ router.get('/regions/:m49', [
       });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -571,6 +580,7 @@ router.get('/countries/', [
         });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -597,6 +607,7 @@ router.get('/countries/:alpha3', [
       });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -669,6 +680,7 @@ router.get('/news/', [
       });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -693,6 +705,7 @@ router.get('/news/:uuid', [
       });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -761,6 +774,7 @@ router.get('/events/', [
       });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
@@ -785,6 +799,7 @@ router.get('/events/:uuid', [
       });
     } catch (err) {
       console.error(err);
+      return res.status(500);
     }
   }
 );
