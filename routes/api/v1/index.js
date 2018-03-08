@@ -320,7 +320,7 @@ router.get('/resources/', [
         ],
         distinct: true,
         subQuery: false,
-        raw: false,
+        raw: true,
       }).then((results) => {
         res.send(results);
       });
