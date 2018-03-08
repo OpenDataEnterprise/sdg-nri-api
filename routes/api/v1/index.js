@@ -316,7 +316,7 @@ router.get('/resources/', [
         offset: offset,
         where: filters,
         order: [
-          [sequelize.col('date_published'), 'DESC'],
+          [sequelize.col('date_published'), 'DESC NULLS LAST'],
         ],
         distinct: true,
         subQuery: false,
