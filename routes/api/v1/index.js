@@ -464,9 +464,12 @@ router.get('/languages/', [
     }
 
     try {
-      models.language.findAll().then((values) => {
-        res.send(values);
-      });
+      const sql = "SELECT array_to_json(array_agg(json_build_object('ietf_tag', ietf_tag, 'name', name, 'label', label))) AS language FROM sdg.language WHERE ietf_tag IN (SELECT DISTINCT(ietf_tag) FROM sdg.language INNER JOIN sdg.resource_languages ON ietf_tag = language_id);";
+
+      sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
+        .then((rows) => {
+          res.send(rows[0].language);
+        });
     } catch (err) {
       console.error(err);
     }
@@ -560,11 +563,12 @@ router.get('/countries/', [
     }
 
     try {
-      models.country.findAll({
-        attributes: ['iso_alpha3', 'region_id', 'name'],
-      }).then((values) => {
-        res.send(values);
-      });
+      const sql = "SELECT array_to_json(array_agg(json_build_object('iso_alpha3', iso_alpha3, 'region_id', region_id, 'name', name))) AS country FROM sdg.country WHERE iso_alpha3 IN (SELECT DISTINCT(iso_alpha3) FROM sdg.country INNER JOIN sdg.resource ON iso_alpha3 = country_id);";
+
+      sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
+        .then((rows) => {
+          res.send(rows[0].country);
+        });
     } catch (err) {
       console.error(err);
     }
