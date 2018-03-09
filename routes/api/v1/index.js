@@ -81,7 +81,7 @@ router.post('/contact-form', async (req, res, next) => {
       res.writeHead(303, {'Location': redirectURL});
       res.end();
     }).catch(function(err) {
-      Promise.reject(err);
+      throw err;
     });
   } catch (err) {
     console.error(err);
@@ -171,9 +171,9 @@ router.post('/submission-form', async (req, res, next) => {
       sendPromise.then(function(data) {
         res.writeHead(303, {'Location': redirectURL});
         res.end();
-      }).catch(function(err) {
-        Promise.reject(err);
       });
+    }).catch(function(err) {
+      throw err;
     });
   } catch (err) {
     console.error(err);
