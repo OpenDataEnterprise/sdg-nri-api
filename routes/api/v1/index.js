@@ -73,7 +73,12 @@ router.post('/contact-form', async (req, res, next) => {
     var sendPromise = new AWS.SES(AWSConfig).sendTemplatedEmail(params).promise();
 
     sendPromise.then(function(data) {
-      res.writeHead(303, {'Location': process.env.SITE_URL + 'thank-you/contact'});
+      let redirectURL = (process.env.SITE_URL + '/thank-you/contact');
+
+      // Remove duplicate forward slashes.
+      redirectURL = redirectURL.replace(/([^:]\/)\/+/g, "$1");
+
+      res.writeHead(303, {'Location': redirectURL});
       res.end();
     }).catch(function(err) {
       throw err;
@@ -158,9 +163,13 @@ router.post('/submission-form', async (req, res, next) => {
       };
 
       var sendPromise = new AWS.SES(AWSConfig).sendTemplatedEmail(params).promise();
+        let redirectURL = process.env.SITE_URL + '/thank-you/submit-resource';
+
+        // Remove duplicate forward slashes.
+        redirectURL = redirectURL.replace(/([^:]\/)\/+/g, "$1");
 
       sendPromise.then(function(data) {
-        res.writeHead(303, {'Location': process.env.SITE_URL + 'thank-you/submit-resource'});
+        res.writeHead(303, {'Location': redirectURL});
         res.end();
       }).catch(function(err) {
         throw err;
