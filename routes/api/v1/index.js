@@ -18,12 +18,15 @@ const AWSConfig = {
   apiVersion: '2010-12-01',
 };
 
+const errorRedirectURL = (process.env.SITE_URL + '/error')
+  // Remove duplicate forward slashes.
+  .replace(/([^:]\/)\/+/g, "$1");
+
 router.get('/', (req, res) => {
   try {
     res.status(200).send();
   } catch (err) {
-    console.error(err);
-    res.status(500).send();
+    handleError(err);
   }
 });
 
@@ -45,8 +48,7 @@ router.post('/contact-form', async (req, res, next) => {
     req.body['interests'] = (typeof req.body['interests'] !== 'undefined')
         ? req.body['interests'] : [];
     req.body['interests'] = Array.isArray(req.body['interests']) ?
-      req.body['interests'] : [req.body['interests']]
-
+      req.body['interests'] : [req.body['interests']];
 
     // Map form input to template variables.
     const templateData = {
@@ -71,21 +73,18 @@ router.post('/contact-form', async (req, res, next) => {
     };
 
     var sendPromise = new AWS.SES(AWSConfig).sendTemplatedEmail(params).promise();
+    await sendPromise;
 
-    sendPromise.then(function(data) {
-      let redirectURL = (process.env.SITE_URL + '/thank-you/contact');
-
+    const redirectURL = (process.env.SITE_URL + '/thank-you/contact')
       // Remove duplicate forward slashes.
-      redirectURL = redirectURL.replace(/([^:]\/)\/+/g, "$1");
+      .replace(/([^:]\/)\/+/g, "$1");
 
-      res.writeHead(303, {'Location': redirectURL});
-      res.end();
-    }).catch(function(err) {
-      throw err;
-    });
+    res.writeHead(303, {'Location': redirectURL});
+    res.end();
   } catch (err) {
     console.error(err);
-    res.status(500).send();
+    res.writeHead(303, {'Location': errorRedirectURL});
+    res.end();
   }
 });
 
@@ -107,77 +106,75 @@ router.post('/submission-form', async (req, res, next) => {
     sanitizeBody('resource-topics.*').stripLow().trim().escape();
     sanitizeBody('resource-additional-info').stripLow().trim().escape();
 
-    return sequelize.transaction(function (t) {
-      return models.resource.create({
+    // Handle empty array (i.e. checkboxes not selected).
+    // Must give at least a default value or else e-mail alerts will not send.
+    req.body['resource-topics'] = (typeof req.body['resource-topics'] !== 'undefined') ?
+      req.body['resource-topics'] : [];
+    req.body['resource-topics'] = Array.isArray(req.body['resource-topics']) ?
+      req.body['resource-topics'] : [req.body['resource-topics']];
+
+    let submission = await sequelize.transaction(async (t) => {
+      let resource = await models.resource.create({
         title: req.body['resource-title'],
         organization: req.body['resource-organization'],
         url: req.body['resource-link'],
         description: req.body['resource-description'],
-      }, { transaction: t }).then(function (resource) {
-        return models.submission.create({
-          resource_id: resource.dataValues.uuid,
-          submitter_country_id: req.body['country'],
-          submitter_name: req.body['first-name'] + ' ' + req.body['last-name'],
-          submitter_organization: req.body['organization'],
-          submitter_title: req.body['title'],
-          submitter_email: req.body['email'],
-          submitter_city: req.body['city'],
-          tags: req.body['resource-topics'],
-          notes: req.body['resource-additional-info'],
-        }, { transaction: t });
-      });
-    }).then(function (submission) {
-      // Handle empty array (i.e. checkboxes not selected).
-      // Must give at least a default value or else e-mail alerts will not send.
-      req.body['resource-topics'] = (typeof req.body['resource-topics'] !== 'undefined') ?
-        req.body['resource-topics'] : [];
-      req.body['resource-topics'] = Array.isArray(req.body['resource-topics']) ?
-        req.body['resource-topics'] : [req.body['resource-topics']];
+      }, { transaction: t });
 
-      // Map form input to template variables.
-      const templateData = {
-        submissionUUID: submission.dataValues.uuid,
-        resourceUUID: submission.dataValues.resource_id,
-        resourceTitle: req.body['resource-title'],
-        resourceOrganization: req.body['resource-organization'],
-        resourceURL: req.body['resource-link'],
-        resourceDescription: req.body['resource-description'],
-        resourceTags: req.body['resource-topics'].join(', '),
-        additionalInfo: req.body['resource-additional-info'],
-        firstName: req.body['first-name'],
-        lastName: req.body['last-name'],
-        emailAddress: req.body['email'],
-        organization: req.body['organization'],
-        title: req.body['title'],
-        country: req.body['country'],
-        city: req.body['city'],
-      };
-
-      const params = {
-        Destination: {
-          ToAddresses: process.env.RECEIVE_RESOURCE_FORM_EMAILS.split(','),
-        },
-        Source: process.env.ALERT_SENDER_EMAIL,
-        Template: 'ResourceFormTemplate',
-        TemplateData: JSON.stringify(templateData),
-      };
-
-      var sendPromise = new AWS.SES(AWSConfig).sendTemplatedEmail(params).promise();
-        let redirectURL = process.env.SITE_URL + '/thank-you/submit-resource';
-
-        // Remove duplicate forward slashes.
-        redirectURL = redirectURL.replace(/([^:]\/)\/+/g, "$1");
-
-      sendPromise.then(function(data) {
-        res.writeHead(303, {'Location': redirectURL});
-        res.end();
-      });
-    }).catch(function(err) {
-      throw err;
+      return models.submission.create({
+        resource_id: resource.dataValues.uuid,
+        submitter_country_id: req.body['country'],
+        submitter_name: req.body['first-name'] + ' ' + req.body['last-name'],
+        submitter_organization: req.body['organization'],
+        submitter_title: req.body['title'],
+        submitter_email: req.body['email'],
+        submitter_city: req.body['city'],
+        tags: req.body['resource-topics'],
+        notes: req.body['resource-additional-info'],
+      }, { transaction: t });
     });
+
+    // Map form input to template variables.
+    const templateData = {
+      submissionUUID: submission.dataValues.uuid,
+      resourceUUID: submission.dataValues.resource_id,
+      resourceTitle: req.body['resource-title'],
+      resourceOrganization: req.body['resource-organization'],
+      resourceURL: req.body['resource-link'],
+      resourceDescription: req.body['resource-description'],
+      resourceTags: req.body['resource-topics'].join(', '),
+      additionalInfo: req.body['resource-additional-info'],
+      firstName: req.body['first-name'],
+      lastName: req.body['last-name'],
+      emailAddress: req.body['email'],
+      organization: req.body['organization'],
+      title: req.body['title'],
+      country: req.body['country'],
+      city: req.body['city'],
+    };
+
+    const params = {
+      Destination: {
+        ToAddresses: process.env.RECEIVE_RESOURCE_FORM_EMAILS.split(','),
+      },
+      Source: process.env.ALERT_SENDER_EMAIL,
+      Template: 'ResourceFormTemplate',
+      TemplateData: JSON.stringify(templateData),
+    };
+
+    const sendPromise = new AWS.SES(AWSConfig).sendTemplatedEmail(params).promise();
+    await sendPromise;
+
+    let redirectURL = process.env.SITE_URL + '/thank-you/submit-resource';
+    // Remove duplicate forward slashes.
+    redirectURL = redirectURL.replace(/([^:]\/)\/+/g, "$1");
+
+    res.writeHead(303, {'Location': redirectURL});
+    res.end();
   } catch (err) {
     console.error(err);
-    res.status(500).send();
+    res.writeHead(303, {'Location': errorRedirectURL});
+    res.end();
   }
 });
 
