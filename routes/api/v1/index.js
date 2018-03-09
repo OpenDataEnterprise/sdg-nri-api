@@ -81,7 +81,7 @@ router.post('/contact-form', async (req, res, next) => {
       res.writeHead(303, {'Location': redirectURL});
       res.end();
     }).catch(function(err) {
-      throw err;
+      Promise.reject(err);
     });
   } catch (err) {
     console.error(err);
@@ -132,7 +132,7 @@ router.post('/submission-form', async (req, res, next) => {
       req.body['resource-topics'] = (typeof req.body['resource-topics'] !== 'undefined') ?
         req.body['resource-topics'] : [];
       req.body['resource-topics'] = Array.isArray(req.body['resource-topics']) ?
-        req.body['resource-topics'] : [req.body['resource-topics']]
+        req.body['resource-topics'] : [req.body['resource-topics']];
 
       // Map form input to template variables.
       const templateData = {
@@ -172,7 +172,7 @@ router.post('/submission-form', async (req, res, next) => {
         res.writeHead(303, {'Location': redirectURL});
         res.end();
       }).catch(function(err) {
-        throw err;
+        Promise.reject(err);
       });
     });
   } catch (err) {
