@@ -6,11 +6,11 @@
   "env": {
     "FOREST_AUTH_SECRET": {
       "description": "A random JWT signing secret to protect your admin API",
-      "value": "7ddb022035b677f5274a6a0600178213736735e12151aff5eca567523c837f05cad93a10c23a36f85810e4943103c5f1"
+      "value": ""
     },
     "FOREST_ENV_SECRET": {
       "description": "The Forest environment secret",
-      "value": "4a1c02a193f8d9b6a3587449ad4a8d5508436cffecb5a896366766866509dd30"
+      "value": ""
     },
     "DATABASE_URL": {
       "description": "The remote database connection URL",
