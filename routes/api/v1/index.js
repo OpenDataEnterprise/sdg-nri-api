@@ -199,6 +199,7 @@ router.get('/resources/', [
       // Set parameter defaults here.
       const limit = req.query.limit ? req.query.limit : 100;
       const offset = req.query.offset ? req.query.offset : 0;
+      const tsvectorColumn = 'tsv';
 
       // Filter specifications.
       const filterList = {
@@ -299,21 +300,43 @@ router.get('/resources/', [
         }
       }
 
+      // Set result ordering criteria.
+      let orderingCols = [];
+
       // This depends on having a column on the table that holds the document
       // vector (i.e. tsvector) of the columns to be available for search.
       // Here, tsmatch is a custom PL/pgSQL convenience function.
       if ('search' in req.query) {
-        let tsvectorColumn = 'tsv';
-
         filters = {
           $and: [
             filters,
             sequelize.fn('tsmatch',
               sequelize.literal(tsvectorColumn),
-              sequelize.fn('plainto_tsquery', 'english', req.query.search)
-            )
-          ]
+              sequelize.fn('phraseto_tsquery',
+                'sdg.english_nostop', // Custom text search dictionary.
+                req.query.search,
+              ),
+            ),
+          ],
         };
+
+        // Order search results by cover density ranking.
+        orderingCols.push([
+          sequelize.fn('ts_rank_cd',
+            'tsv',
+            sequelize.fn('phraseto_tsquery',
+              'sdg.english_nostop', // Custom text search dictionary.
+              req.query.search,
+            ),
+          ),
+          'DESC',
+        ]);
+      } else {
+        // Order by publication date by default w/ NULL last.
+        orderingCols.push([
+          sequelize.col('date_published'),
+          'DESC NULLS LAST',
+        ]);
       }
 
       models.resource.findAndCountAll({
@@ -321,9 +344,7 @@ router.get('/resources/', [
         limit: limit,
         offset: offset,
         where: filters,
-        order: [
-          [sequelize.col('date_published'), 'DESC NULLS LAST'],
-        ],
+        order: orderingCols,
         distinct: true,
         subQuery: false,
         raw: true,
