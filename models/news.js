@@ -16,8 +16,14 @@ module.exports = (sequelize, DataTypes) => {
     url: {
       type: DataTypes.TEXT,
     },
+    published_at: {
+      type: DataTypes.DATE,
+    },
     description: {
       type: DataTypes.TEXT,
+    },
+    publish: {
+      type: DataTypes.BOOLEAN,
     },
     tags: {
       type: DataTypes.ARRAY(DataTypes.TEXT),

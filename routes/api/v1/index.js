@@ -667,7 +667,9 @@ router.get('/news/', [
       };
 
       // Set filters.
-      let filters = {};
+      let filters = {
+        publish: true, // Filter on publication flag by default.
+      };
 
       for (let filterName in filterList) {
         if (filterName in req.query) {
@@ -766,7 +768,9 @@ router.get('/events/', [
       };
 
       // Set filters.
-      let filters = {};
+      let filters = {
+        publish: true, // Filter on publication flag by default.
+      };
 
       for (const filterName in filterList) {
         if (filterName in req.query) {
