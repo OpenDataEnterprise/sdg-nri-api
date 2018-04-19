@@ -19,13 +19,16 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cors({
-  allowedOrigins: ['*', '*.forestadmin.com'],
+  allowedOrigins: ['*.forestadmin.com'],
   headers: ['Authorization', 'X-Requested-With', 'Content-Type']
 }));
 
+// Only apply Forest auth secret to Forest routes.
 app.use(jwt({
   secret: process.env.FOREST_AUTH_SECRET,
-  credentialsRequired: false
+  credentialsRequired: true
+}).unless({
+  path: [/(?!forest)(.*)/]
 }));
 
 fs.readdirSync('./routes/api/v1/').forEach((file) => {
