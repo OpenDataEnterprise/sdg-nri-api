@@ -1,3 +1,4 @@
-DROP TABLE IF EXISTS sdg.resource_countries;
+ALTER TABLE IF EXISTS sdg.resource
+    ADD COLUMN IF NOT EXISTS country_id CHAR(3);
 
-ALTER TABLE sdg.resource ADD COLUMN IF NOT EXISTS country_id;
+DROP TABLE IF EXISTS sdg.resource_countries;
