@@ -1,7 +1,7 @@
-/* Provide UUID generation functions. */
+-- Provide UUID generation functions.
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-/* Provide LTREE data type support. */
+-- Provide LTREE data type support.
 CREATE EXTENSION IF NOT EXISTS "ltree";
 
 CREATE SCHEMA IF NOT EXISTS sdg;
@@ -132,10 +132,10 @@ CREATE TABLE IF NOT EXISTS sdg.resource_tags (
     PRIMARY KEY (resource_id, tag_id)
 );
 
-/* Create search index on resource text search field. */
+-- Create search index on resource text search field.
 CREATE INDEX resource_tsv_idx ON sdg.resource USING gin(tsv);
 
-/* Create search index update function. */
+-- Create search index update function.
 CREATE OR REPLACE FUNCTION resource_tsv_update_trigger() RETURNS trigger AS $$
 BEGIN
     NEW.tsv :=
@@ -146,18 +146,19 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
-/* Create text search function. */
+-- Create text search function.
 CREATE OR REPLACE FUNCTION tsmatch(a tsvector, b tsquery) RETURNS boolean AS $$
 BEGIN
     RETURN a @@ b;
 END;
 $$ LANGUAGE plpgsql;
 
-/* Trigger search index (re)generation on resource row inserts or updates. */
+-- Trigger search index (re)generation on resource row inserts or updates.
 CREATE TRIGGER resource_tsv_update
     BEFORE INSERT OR UPDATE ON sdg.resource
     FOR EACH ROW EXECUTE PROCEDURE resource_tsv_update_trigger();
 
+-- Load initial topics.
 INSERT INTO sdg.topic (topic, path, label, ordering) VALUES
 ('sdg', 'sdg', 'Why SDG reporting?', '1'),
 ('intro', 'sdg.intro', 'What are the SDGs and the Data Revolution?', '1.1'),
@@ -182,6 +183,7 @@ INSERT INTO sdg.topic (topic, path, label, ordering) VALUES
 ('customization', 'opensource.customization', 'Customization and additional features', '5.5'),
 ('countries', 'countries', 'Country Experiences', '6');
 
+-- Load initial languages.
 INSERT INTO sdg.language (ietf_tag, name, label) VALUES
 ('en', 'English', 'English'),
 ('fr', 'French', 'français'),
@@ -209,6 +211,7 @@ INSERT INTO sdg.language (ietf_tag, name, label) VALUES
 ('sv', 'Swedish', 'Svenska'),
 ('tr', 'Turkish', 'Türkçe');
 
+-- Load region scheme.
 INSERT INTO sdg.region (m49, path, name) VALUES
 ('001', '001', 'World'),
 ('002', '001.002', 'Africa'),
@@ -241,6 +244,7 @@ INSERT INTO sdg.region (m49, path, name) VALUES
 ('057', '001.009.057', 'Micronesia'),
 ('061', '001.009.061', 'Polynesia');
 
+-- Load initial list of countries (UN member countries).
 INSERT INTO sdg.country (iso_alpha3, region_id, name) VALUES
 ('AFG', '034', 'Afghanistan'),
 ('ALB', '039', 'Albania'),
@@ -437,6 +441,7 @@ INSERT INTO sdg.country (iso_alpha3, region_id, name) VALUES
 ('ZMB', '014', 'Zambia'),
 ('ZWE', '014', 'Zimbabwe');
 
+-- Load initial list of content types.
 INSERT INTO sdg.content_type (id, name) VALUES
 (1, 'Report'),
 (2, 'Article'),
@@ -449,46 +454,15 @@ INSERT INTO sdg.content_type (id, name) VALUES
 (9, 'Repository'),
 (10, 'Video');
 
+-- Load initial list of submission states.
 INSERT INTO sdg.submission_status (id, status) VALUES
 (1, 'Unreviewed'),
 (2, 'Under review'),
 (3, 'Accepted');
 
-/* Template
-WITH insert1 AS (
-  -- Create resource.
-  INSERT INTO sdg.resource (organization, title, url, description, country_id, date_published, tags) VALUES    
-  (
-
-  )
-  RETURNING uuid
-), insert2 AS (
-  -- Associate topics.
-  INSERT INTO sdg.resource_topics (resource_id, topic_id) VALUES
-  (
-    (SELECT uuid FROM insert1),
-    (SELECT id FROM sdg.topic WHERE topic = '')
-  )
-  RETURNING *
-), insert3 AS (
-  -- Associate content types.
-  INSERT INTO sdg.resource_content_types (resource_id, content_type_id) VALUES
-  (
-    (SELECT DISTINCT (resource_id) FROM insert2),
-    (SELECT id FROM sdg.content_type WHERE name = '')
-  )
-  RETURNING *
-)
--- Associate languages.
-INSERT INTO sdg.resource_languages (resource_id, language_id) VALUES
-(
-  (SELECT DISTINCT (resource_id) FROM insert3),
-  (SELECT ietf_tag FROM sdg.language WHERE name = 'English')
-);
-*/
-
-DELETE FROM sdg.resource;
-
+/**
+ * Load initial resources.
+ */
 WITH insert1 AS (
   -- Create resource.
   INSERT INTO sdg.resource (organization, title, url, description, country_id, tags) VALUES
@@ -3742,10 +3716,12 @@ INSERT INTO sdg.resource_languages (resource_id, language_id) VALUES
   (SELECT ietf_tag FROM sdg.language WHERE name = 'English')
 );
 
+-- Set all initial resources to be published by default.
 UPDATE sdg.resource SET publish = true;
 
-DELETE FROM sdg.news;
-
+/**
+ * Load initial news articles.
+ */
 INSERT INTO sdg.news (title, organization, url, description) VALUES
 (
   'Sustainable Development Goals: progress and possibilities: November 2017',
@@ -3760,8 +3736,9 @@ INSERT INTO sdg.news (title, organization, url, description) VALUES
   'Launch of the SDG National Reporting Initiative to support government reporting on the SDGs for data-driven policymaking.'
 );
 
-DELETE FROM sdg.event;
-
+/**
+ * Load initial events.
+ */
 INSERT INTO sdg.event (title, url, start_time, end_time, locations) VALUES
 ('GPSDD: Data for Development Festival', 'http://www.data4sdgs.org/news/data-development-festival', '2018-03-21 09:00:00+00', '2018-03-23 17:00:00+00', '{"Bristol, UK"}'),
 ('UN Seminar on Open Data & SDGs', 'https://unstats.un.org/sdgs/meetings/sdg-seminar-seoul-2017/', '2017-09-26 00:00:00+00', '2017-09-28 00:00:00+00', '{"Seoul, South Korea"}'),
