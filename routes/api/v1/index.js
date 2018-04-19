@@ -228,6 +228,12 @@ router.get('/resources/', [
           filteringField: 'ietf_tag',
           retrieveFields: ['ietf_tag'],
         },
+        'country': {
+          association: 'countries',
+          model: 'country',
+          filteringField: 'iso_alpha3',
+          retrieveFields: ['iso_alpha3'],
+        },
       };
 
       // Set filters.
@@ -384,13 +390,6 @@ router.get('/resources/:uuid', [
 );
 
 router.get('/content_types/', async (req, res, next) => {
-    // Process validation results.
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.mapped() });
-    }
-
     try {
       const sql = "SELECT array_to_json(array_agg(json_build_object('id', id, 'name', name))) AS content_type FROM sdg.content_type WHERE id IN (SELECT DISTINCT(id) FROM sdg.content_type INNER JOIN sdg.resource_content_types ON id = content_type_id);";
 
@@ -509,7 +508,7 @@ router.get('/languages/', [
   }
 );
 
-router.get('/languages/:id', async (req, res, next) => {
+router.get('/languages/:ietf_tag', async (req, res, next) => {
     // Process validation results.
     const errors = validationResult(req);
 
@@ -518,7 +517,7 @@ router.get('/languages/:id', async (req, res, next) => {
     }
 
     try {
-      const id = req.params.id;
+      const id = req.params.ietf_tag;
 
       models.language.findById(id).then((value) => {
         res.send(value);
