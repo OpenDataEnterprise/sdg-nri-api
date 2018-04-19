@@ -25,6 +25,9 @@ module.exports = (sequelize, DataTypes) => {
     locations: {
       type: DataTypes.ARRAY(DataTypes.TEXT),
     },
+    publish: {
+      type: DataTypes.BOOLEAN,
+    },
     tags: {
       type: DataTypes.ARRAY(DataTypes.TEXT),
     },
