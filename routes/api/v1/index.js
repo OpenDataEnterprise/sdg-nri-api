@@ -206,10 +206,6 @@ router.get('/resources/', [
         'tags': {
           filteringField: 'tags',
         },
-        'country': {
-          model: 'country',
-          filteringField: 'country_id',
-        },
         'type': {
           association: 'content_types',
           model: 'content_type',
@@ -598,7 +594,7 @@ router.get('/countries/', [
     }
 
     try {
-      const sql = "SELECT array_to_json(array_agg(json_build_object('iso_alpha3', iso_alpha3, 'region_id', region_id, 'name', name))) AS country FROM sdg.country WHERE iso_alpha3 IN (SELECT DISTINCT(iso_alpha3) FROM sdg.country INNER JOIN sdg.resource ON iso_alpha3 = country_id);";
+      const sql = "SELECT array_to_json(array_agg(json_build_object('iso_alpha3', iso_alpha3, 'region_id', region_id, 'name', name))) AS country FROM sdg.country WHERE iso_alpha3 IN (SELECT DISTINCT(iso_alpha3) FROM sdg.country INNER JOIN sdg.resource_countries ON iso_alpha3 = country_id);";
 
       sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
         .then((rows) => {
