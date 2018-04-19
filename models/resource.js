@@ -7,13 +7,6 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: sequelize.literal('uuid_generate_v1mc()'),
       primaryKey: true,
     },
-    country_id: {
-      type: DataTypes.CHAR(3),
-      references: {
-        model: sequelize.models.country,
-        key: 'iso_alpha3',
-      },
-    },
     title: {
       type: DataTypes.TEXT,
     },
@@ -53,9 +46,6 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Model.associate = (models) => {
-    Model.belongsTo(models.country, {
-      foreignKey: 'country_id',
-    });
     Model.belongsToMany(models.topic, {
       through: {
         model: 'resource_topics',
@@ -83,6 +73,16 @@ module.exports = (sequelize, DataTypes) => {
       },
       foreignKey: 'resource_id',
       otherKey: 'language_id',
+      constraints: true,
+      cascade: true,
+    });
+    Model.belongsToMany(models.country, {
+      through: {
+        model: 'resource_countries',
+        unique: true,
+      },
+      foreignKey: 'resource_id',
+      otherKey: 'country_id',
       constraints: true,
       cascade: true,
     });
