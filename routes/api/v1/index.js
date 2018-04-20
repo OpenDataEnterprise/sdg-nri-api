@@ -206,10 +206,6 @@ router.get('/resources/', [
         'tags': {
           filteringField: 'tags',
         },
-        'country': {
-          model: 'country',
-          filteringField: 'country_id',
-        },
         'type': {
           association: 'content_types',
           model: 'content_type',
@@ -227,6 +223,12 @@ router.get('/resources/', [
           model: 'language',
           filteringField: 'ietf_tag',
           retrieveFields: ['ietf_tag'],
+        },
+        'country': {
+          association: 'countries',
+          model: 'country',
+          filteringField: 'iso_alpha3',
+          retrieveFields: ['iso_alpha3'],
         },
       };
 
@@ -384,13 +386,6 @@ router.get('/resources/:uuid', [
 );
 
 router.get('/content_types/', async (req, res, next) => {
-    // Process validation results.
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.mapped() });
-    }
-
     try {
       const sql = "SELECT array_to_json(array_agg(json_build_object('id', id, 'name', name))) AS content_type FROM sdg.content_type WHERE id IN (SELECT DISTINCT(id) FROM sdg.content_type INNER JOIN sdg.resource_content_types ON id = content_type_id);";
 
@@ -509,7 +504,7 @@ router.get('/languages/', [
   }
 );
 
-router.get('/languages/:id', async (req, res, next) => {
+router.get('/languages/:ietf_tag', async (req, res, next) => {
     // Process validation results.
     const errors = validationResult(req);
 
@@ -518,7 +513,7 @@ router.get('/languages/:id', async (req, res, next) => {
     }
 
     try {
-      const id = req.params.id;
+      const id = req.params.ietf_tag;
 
       models.language.findById(id).then((value) => {
         res.send(value);
@@ -599,7 +594,7 @@ router.get('/countries/', [
     }
 
     try {
-      const sql = "SELECT array_to_json(array_agg(json_build_object('iso_alpha3', iso_alpha3, 'region_id', region_id, 'name', name))) AS country FROM sdg.country WHERE iso_alpha3 IN (SELECT DISTINCT(iso_alpha3) FROM sdg.country INNER JOIN sdg.resource ON iso_alpha3 = country_id);";
+      const sql = "SELECT array_to_json(array_agg(json_build_object('iso_alpha3', iso_alpha3, 'region_id', region_id, 'name', name))) AS country FROM sdg.country WHERE iso_alpha3 IN (SELECT DISTINCT(iso_alpha3) FROM sdg.country INNER JOIN sdg.resource_countries ON iso_alpha3 = country_id);";
 
       sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
         .then((rows) => {
@@ -668,7 +663,9 @@ router.get('/news/', [
       };
 
       // Set filters.
-      let filters = {};
+      let filters = {
+        publish: true, // Filter on publication flag by default.
+      };
 
       for (let filterName in filterList) {
         if (filterName in req.query) {
@@ -767,7 +764,9 @@ router.get('/events/', [
       };
 
       // Set filters.
-      let filters = {};
+      let filters = {
+        publish: true, // Filter on publication flag by default.
+      };
 
       for (const filterName in filterList) {
         if (filterName in req.query) {
