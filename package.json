@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "prepare": "patch-package"
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "aws-sdk": "^2.190.0",
