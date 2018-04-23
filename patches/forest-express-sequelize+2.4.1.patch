@@ -1,0 +1,30 @@
+patch-package
+--- a/node_modules/forest-express-sequelize/services/search-builder.js
++++ b/node_modules/forest-express-sequelize/services/search-builder.js
+@@ -18,7 +18,12 @@ function SearchBuilder(model, opts, params, fieldNamesRequested) {
+   function lowerIfNecessary(entry) {
+     // NOTICE: MSSQL search is natively case insensitive, do not use the "lower" function for
+     //         performance optimization.
+-    if (Database.isMSSQL(opts)) { return entry; }
++    if (Database.isMSSQL(opts)) {
++        return entry;
++    } else if (Database.isPostgreSQL) {
++        entry = opts.sequelize.cast(entry, 'text');
++    }
++
+     return opts.sequelize.fn('lower', entry);
+   }
+ 
+--- a/node_modules/forest-express-sequelize/utils/database.js
++++ b/node_modules/forest-express-sequelize/utils/database.js
+@@ -7,6 +7,10 @@ function optionsInvalid(options) {
+     options.connections[0].options && options.connections[0].options.dialect);
+ }
+ 
++exports.isPostgreSQL = function(options) {
++  return options.connections[0].options.dialect = 'postgres';
++}
++
+ exports.isMySQL = function(options) {
+   if (optionsInvalid(options)) { return false; }
+   return ['mysql', 'mariadb'].indexOf(options.connections[0].options.dialect) > -1;
