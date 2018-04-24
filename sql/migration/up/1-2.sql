@@ -38,11 +38,6 @@ CREATE TABLE IF NOT EXISTS sdg.content_type (
     name TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS sdg.tag (
-    uuid UUID PRIMARY KEY,
-    name TEXT NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS sdg.resource (
     uuid UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
     content_type_id INTEGER REFERENCES sdg.content_type (id) ON UPDATE CASCADE,
@@ -126,12 +121,6 @@ CREATE TABLE IF NOT EXISTS sdg.resource_content_types (
     PRIMARY KEY (resource_id, content_type_id)
 );
 
-CREATE TABLE IF NOT EXISTS sdg.resource_tags (
-    resource_id UUID REFERENCES sdg.resource (uuid) ON UPDATE CASCADE ON DELETE CASCADE,
-    tag_id UUID REFERENCES sdg.tag (uuid) ON UPDATE CASCADE ON DELETE CASCADE,
-    PRIMARY KEY (resource_id, tag_id)
-);
-
 -- Create search index on resource text search field.
 CREATE INDEX resource_tsv_idx ON sdg.resource USING gin(tsv);
 
@@ -143,7 +132,7 @@ BEGIN
         setweight(to_tsvector('english', COALESCE(NEW.organization,'')), 'B') ||
         setweight(to_tsvector('english', COALESCE(NEW.description,'')), 'C');
     RETURN NEW;
-END
+END;
 $$ LANGUAGE plpgsql;
 
 -- Create text search function.
