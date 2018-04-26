@@ -204,7 +204,10 @@ router.get('/resources/', [
       // Filter specifications.
       const filterList = {
         'tags': {
-          filteringField: 'tags',
+          association: 'tags',
+          model: 'tag',
+          filteringField: 'name',
+          retrieveFields: ['name'],
         },
         'type': {
           association: 'content_types',
@@ -239,11 +242,15 @@ router.get('/resources/', [
       let assocFilters = {};
 
       for (const filterName in filterList) {
+        // Check whether the specified filter matches a query string parameter.
         if (filterName in req.query) {
           const filter = filterList[filterName];
           const filterField = filter.filteringField;
+
+          // Get value to filter for from querysting.
           let filterValue = req.query[filterName];
 
+          // Check whether field to filter on exists on the resource model.
           if (filterField in models.resource.attributes) {
             const isArrayField = (models.resource.attributes[filterField].type
               .toString().indexOf('[]') > -1);
