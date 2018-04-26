@@ -25,8 +25,9 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.TEXT,
     },
-    tags: {
+    assigned_tags: {
       type: DataTypes.ARRAY(DataTypes.TEXT),
+      field: 'tags',
     },
     publish: {
       type: DataTypes.BOOLEAN,
@@ -83,6 +84,16 @@ module.exports = (sequelize, DataTypes) => {
       },
       foreignKey: 'resource_id',
       otherKey: 'country_id',
+      constraints: true,
+      cascade: true,
+    });
+    Model.belongsToMany(models.tag, {
+      through: {
+        model: 'resource_tags',
+        unique: true,
+      },
+      foreignKey: 'resource_id',
+      otherKey: 'tag_id',
       constraints: true,
       cascade: true,
     });
