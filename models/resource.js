@@ -33,6 +33,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    notes: {
+      type: DataTypes.TEXT,
+    }
   }, {
     tableName: 'resource',
     underscored: true,
