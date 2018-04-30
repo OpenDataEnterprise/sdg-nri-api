@@ -22,8 +22,9 @@ module.exports = (sequelize, DataTypes) => {
     end_time: {
       type: DataTypes.DATE,
     },
-    locations: {
+    assigned_locations: {
       type: DataTypes.ARRAY(DataTypes.TEXT),
+      field: 'locations',
     },
     publish: {
       type: DataTypes.BOOLEAN,
@@ -37,6 +38,19 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     schema: process.env.DATABASE_SCHEMA,
   });
+
+  Model.associate = (models) => {
+    Model.belongsToMany(models.location, {
+      through: {
+        model: 'event_locations',
+        unique: true,
+      },
+      foreignKey: 'event_id',
+      otherKey: 'location_id',
+      constraints: true,
+      cascade: true,
+    });
+  };
 
   return Model;
 };

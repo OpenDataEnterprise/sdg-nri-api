@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-  var Model = sequelize.define('tag', {
+  var Model = sequelize.define('location', {
     uuid: {
       type: DataTypes.UUID,
       defaultValue: sequelize.literal('uuid_generate_v1mc()'),
@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
   }, {
-    tableName: 'tag',
+    tableName: 'location',
     underscored: true,
     timestamps: false,
     schema: process.env.DATABASE_SCHEMA,
