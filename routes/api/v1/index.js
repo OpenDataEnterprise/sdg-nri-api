@@ -446,11 +446,41 @@ router.get('/topics/', [
     }
 
     try {
-      const sql = "SELECT array_to_json(array_agg(json_build_object('topic', topic.topic, 'label', topic.label, 'subtopics', (SELECT COALESCE(array_to_json(array_agg(subtopic)), '[]') FROM sdg.topic AS subtopic WHERE subtopic.path <@ topic.path AND subtopic.path <> topic.path)))) AS topic FROM sdg.topic WHERE topic.path ~ '*{,1}';";
+      // Set parameter defaults here.
+      const nested = (req.query.nested === 'false') ? false : true;
+
+      // Retrieve topics in nested structure by default.
+      let sql = "SELECT array_to_json(array_agg(json_build_object(" +
+        "'topic', topic.topic, " +
+        "'label', topic.label, " +
+        "'path', topic.path, " +
+        "'ordering', topic.ordering, " +
+        "'subtopics', (SELECT COALESCE(array_to_json(array_agg(subtopic)), '[]') " +
+        "FROM (SELECT * " +
+        "FROM sdg.topic AS s " +
+        "WHERE s.path <@ topic.path " +
+        "AND s.path <> topic.path " +
+        "ORDER BY s.ordering ASC) AS subtopic)))) AS topics " +
+        "FROM (SELECT * " +
+        "FROM sdg.topic " +
+        "WHERE topic.path ~ '*{,1}' " +
+        "ORDER BY topic.ordering ASC) AS topic";
+
+      if (nested === false) {
+        // Retrieve topics in flat structure.
+        sql = "SELECT array_to_json(array_agg(json_build_object(" +
+        "'topic', topic.topic, " +
+        "'label', topic.label, " +
+        "'path', topic.path, " +
+        "'ordering', topic.ordering))) AS topics " +
+        "FROM (SELECT * " +
+        "FROM sdg.topic AS topic " +
+        "ORDER BY topic.ordering ASC) AS topic";
+      }
 
       sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
         .then((rows) => {
-          res.send(rows[0].topic);
+          res.send(rows[0].topics);
         });
     } catch (err) {
       console.error(err);
@@ -601,11 +631,30 @@ router.get('/countries/', [
     }
 
     try {
-      const sql = "SELECT array_to_json(array_agg(json_build_object('iso_alpha3', iso_alpha3, 'region_id', region_id, 'name', name))) AS country FROM sdg.country WHERE iso_alpha3 IN (SELECT DISTINCT(iso_alpha3) FROM sdg.country INNER JOIN sdg.resource_countries ON iso_alpha3 = country_id);";
+      // Set parameter defaults here.
+      const all = (req.query.all === 'true') ? true : false;
+
+      let sql = "SELECT array_to_json(array_agg(json_build_object(" +
+      "'iso_alpha3', iso_alpha3, " +
+      "'region_id', region_id, " +
+      "'name', name))) AS countries " +
+      "FROM sdg.country " +
+      "WHERE iso_alpha3 " +
+      "IN (SELECT DISTINCT(iso_alpha3) " +
+      "FROM sdg.country " +
+      "INNER JOIN sdg.resource_countries " +
+      "ON iso_alpha3 = country_id)";
+
+      if (all === true) {
+        sql = "SELECT array_to_json(array_agg(json_build_object(" +
+        "'iso_alpha3', iso_alpha3, " +
+        "'name', name))) AS countries " +
+        "FROM sdg.country";
+      }
 
       sequelize.query(sql, { type: sequelize.QueryTypes.SELECT })
         .then((rows) => {
-          res.send(rows[0].country);
+          res.send(rows[0].countries);
         });
     } catch (err) {
       console.error(err);
